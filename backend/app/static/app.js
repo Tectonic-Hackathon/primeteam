@@ -5,6 +5,16 @@ const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString("en-GB", { day: 
 const evDate = (e) => (e.date_known === false ? "no date" : fmtDate(e.updated_at));
 const pct = (x) => Math.round(x * 100);
 
+/* Single HTML sink: templates are escaped with esc(); setHTML() additionally sanitizes and never uses innerHTML. */
+function setHTML(el, html) {
+  if (window.DOMPurify) {
+    el.replaceChildren(DOMPurify.sanitize(html, { RETURN_DOM_FRAGMENT: true, ADD_ATTR: ["target"] }));
+    return;
+  }
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  el.replaceChildren(...doc.body.childNodes);
+}
+
 const state = { result: null, evidenceById: {}, meta: null, people: [], peopleById: {} };
 
 const STATUS = {
@@ -25,9 +35,9 @@ async function init() {
     fetch("/api/meta").then((r) => r.json()),
   ]);
   state.people = people; state.meta = meta;
-  $("#user").innerHTML = `<option value="">anonymous</option>` + people.filter((p) => p.active).map((p) => `<option value="${p.id}">${esc(p.name)} · ${esc(p.team)}</option>`).join("");
+  setHTML($("#user"), `<option value="">anonymous</option>` + people.filter((p) => p.active).map((p) => `<option value="${p.id}">${esc(p.name)} · ${esc(p.team)}</option>`).join(""));
   state.health = health;
-  $("#suggestions").innerHTML = suggestions.map((s, i) => `<button class="chip ${i >= 3 ? "extra" : ""}" type="button">${esc(s)}</button>`).join("");
+  setHTML($("#suggestions"), suggestions.map((s, i) => `<button class="chip ${i >= 3 ? "extra" : ""}" type="button">${esc(s)}</button>`).join(""));
   $("#morelink").addEventListener("click", () => { $("#suggestions").classList.add("show-all"); $("#morelink").classList.add("hidden"); });
   $("#evtoggle").addEventListener("click", () => $("#evidence-card").classList.toggle("collapsed"));
 
@@ -69,7 +79,7 @@ function switchTab(name) {
 }
 
 function showProgress() {
-  $("#tab-answer").innerHTML = `<ul class="progress">${PROGRESS.map((s, i) => `<li class="${i === 0 ? "active" : ""}"><span class="dot"></span>${s}</li>`).join("")}</ul>`;
+  setHTML($("#tab-answer"), `<ul class="progress">${PROGRESS.map((s, i) => `<li class="${i === 0 ? "active" : ""}"><span class="dot"></span>${s}</li>`).join("")}</ul>`);
   let i = 0;
   return setInterval(() => {
     const items = document.querySelectorAll("#tab-answer .progress li");
@@ -101,7 +111,7 @@ async function ask() {
     switchTab("answer");
     history.replaceState(null, "", `?q=${encodeURIComponent(q)}`);
   } catch (err) {
-    $("#tab-answer").innerHTML = `<div class="note gap">Something went wrong: ${esc(err.message)}</div>`;
+    setHTML($("#tab-answer"), `<div class="note gap">Something went wrong: ${esc(err.message)}</div>`);
   } finally {
     clearInterval(timer);
     $("#askbtn").disabled = false; $("#askbtn").textContent = "Ask";
@@ -171,7 +181,7 @@ function renderAnswer(r) {
     }
     html += `</div>`;
   }
-  $("#tab-answer").innerHTML = html;
+  setHTML($("#tab-answer"), html);
 }
 
 function personCard(p, action = "") {
@@ -192,14 +202,14 @@ function openPerson(id) {
   if (!p) return;
   const r = state.result;
   const subject = encodeURIComponent(`Question: ${r.question}`);
-  $("#modal-body").innerHTML = `
+  setHTML($("#modal-body"), `
     <button class="close" data-close>✕</button>
     <div class="person-head"><div class="avatar big">${esc(p.initials)}</div><div><h3 style="margin:0">${esc(p.name)}</h3><div class="sub" style="margin:2px 0 0">${esc(p.role)} · ${esc(p.team)}${p.country ? " · " + esc(p.country) : ""} · ${p.seniority_years} yrs</div></div></div>
     <div class="confrow" style="margin-top:16px"><b>Credibility ${p.score} / 100</b><span class="muted">on ${esc(p.topics.join(", ") || "this topic")}${r.context.country_name ? " for " + esc(r.context.country_name) : ""}</span></div>
     <p class="muted" style="font-size:13px;margin:0 0 14px">Built from ${p.events} recorded contribution${p.events === 1 ? "" : "s"} on this topic: owning or writing a document counts most, editing and answering questions next, attending a meeting least. Recent work counts more than old work, and work for another country counts a third. Seniority is only a small tie-breaker.</p>
     <h4 style="margin:0 0 8px;font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Track record</h4>
     <ul class="track">${p.reasons.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
-    <div class="modal-actions">${p.email ? `<a class="btn" href="mailto:${esc(p.email)}?subject=${subject}">Ask ${esc(p.name.split(" ")[0])} by email</a>` : ""}</div>`;
+    <div class="modal-actions">${p.email ? `<a class="btn" href="mailto:${esc(p.email)}?subject=${subject}">Ask ${esc(p.name.split(" ")[0])} by email</a>` : ""}</div>`);
   $("#modal").classList.remove("hidden");
 }
 
@@ -221,11 +231,11 @@ function renderExperts(r) {
   const local = experts.filter((p) => p.in_country !== false);
   let fallback = false;
   if (local.length) experts = local; else if (experts.length && c.country_name) { fallback = true; sub = `no ${c.country_name} specialist on record for this topic, showing the closest expertise`; }
-  if (!experts.length) { el.innerHTML = `<h3 class="card-title">${title}</h3><div class="empty">No expertise signals for these topics.</div>`; return; }
+  if (!experts.length) { setHTML(el, `<h3 class="card-title">${title}</h3><div class="empty">No expertise signals for these topics.</div>`); return; }
   const subject = encodeURIComponent(`Question: ${r.question}`);
   const body = encodeURIComponent(`Hi,\n\nGrounded could not find a reliable answer to:\n"${r.question}"\n\nYou were suggested as the person most likely to know. Could you help?\n\nThanks`);
-  el.innerHTML = `<h3 class="card-title" style="margin-bottom:2px">${title}</h3><p class="muted" style="font-size:12.5px;margin:0 0 12px">${sub}</p>
-    ${experts.map((p) => personCard(p, mode !== "info" && p.email ? `<a class="contact" href="mailto:${esc(p.email)}?subject=${subject}&body=${body}" title="Email ${esc(p.name)}">Ask</a>` : "")).join("")}`;
+  setHTML(el, `<h3 class="card-title" style="margin-bottom:2px">${title}</h3><p class="muted" style="font-size:12.5px;margin:0 0 12px">${sub}</p>
+    ${experts.map((p) => personCard(p, mode !== "info" && p.email ? `<a class="contact" href="mailto:${esc(p.email)}?subject=${subject}&body=${body}" title="Email ${esc(p.name)}">Ask</a>` : "")).join("")}`);
 }
 
 function statusTag(e) {
@@ -243,8 +253,8 @@ function evidenceMeta(e) {
 function renderEvidence(r) {
   $("#evcount").textContent = r.evidence.length ? `· ${r.evidence.length}` : "";
   $("#evidence-card").classList.toggle("hidden", !r.evidence.length);
-  if (!r.evidence.length) { $("#evidence").innerHTML = `<div class="empty">Nothing was cited, so nothing is claimed.</div>`; return; }
-  $("#evidence").innerHTML = r.evidence.map((e) => `
+  if (!r.evidence.length) { setHTML($("#evidence"), `<div class="empty">Nothing was cited, so nothing is claimed.</div>`); return; }
+  setHTML($("#evidence"), r.evidence.map((e) => `
     <div class="evidence-item" data-ev="${e.id}">
       <div class="ev-id ${e.contested ? "contested" : ""}">${e.id}</div>
       <div style="min-width:0">
@@ -252,7 +262,7 @@ function renderEvidence(r) {
         <div class="ev-meta"><span class="doctype ${esc(e.doc_type)}">${esc(e.doc_type)}</span><span>${e.owner ? esc(e.owner) : e.author ? esc(e.author) + " (no owner)" : "No owner"}</span><span>${evDate(e)}</span><span>§ ${esc(e.section)}, lines ${e.line_start}–${e.line_end}</span></div>
       </div>
       <div class="conf"><span title="Confidence: how well this passage matches the question and how much it can be trusted">${pct(e.confidence)}%</span><button class="eye" type="button" data-ev="${e.id}" title="Why this confidence">${EYE}</button></div>
-    </div>`).join("");
+    </div>`).join(""));
 }
 
 function shortMeta(e) {
@@ -276,7 +286,7 @@ function issueCard(id, kind, label, headline, did, actions, items) {
 function renderReview(r) {
   const rv = r.review;
   $("#reviewcount").textContent = r.review_count;
-  if (!r.review_count) { $("#tab-review").innerHTML = `<div class="empty">No issues. Nothing conflicting, duplicated, outdated or from the wrong country was found near this question.</div>`; return; }
+  if (!r.review_count) { setHTML($("#tab-review"), `<div class="empty">No issues. Nothing conflicting, duplicated, outdated or from the wrong country was found near this question.</div>`); return; }
   let html = `<p class="rintro">Problems found around this question. Each one can be fixed here, and the fix applies to everyone's next answer.</p>`;
   let n = 0;
   for (const c of rv.conflicts) {
@@ -340,7 +350,7 @@ function renderReview(r) {
     const headline = `<b>${esc(i.title)}</b> applies to ${esc(i.country_name)}, this question is about ${esc(r.context.country_name || "another country")}. It was excluded so the wrong rule is not applied.`;
     html += issueCard(++n, "grey", "Wrong country", headline, "", A("Fine, nothing to fix", "dismiss", i.document_id) + A(`Country tag looks wrong, ask ${esc(who(i))}`, "request_update", i.document_id, `data-note="Country tag may be wrong"`), [i]);
   }
-  $("#tab-review").innerHTML = html;
+  setHTML($("#tab-review"), html);
 }
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -357,7 +367,7 @@ async function reviewAction(btn) {
   const done = issue.querySelector(".issue-done");
   const finish = (msg, undoDoc) => {
     issue.classList.add("resolved");
-    done.innerHTML = `✓ ${msg}${undoDoc ? ` · <button class="undo" type="button" data-action="restore" data-doc="${esc(undoDoc)}">Undo</button>` : ""}`;
+    setHTML(done, `✓ ${msg}${undoDoc ? ` · <button class="undo" type="button" data-action="restore" data-doc="${esc(undoDoc)}">Undo</button>` : ""}`);
     done.classList.remove("hidden");
   };
   if (action === "dismiss") { finish("Dismissed for this question."); return; }
@@ -390,7 +400,7 @@ function renderTrace(r) {
   }
   const h = state.health || {};
   html += `<p class="muted" style="font-size:12.5px;margin-top:14px">Index: ${h.documents ?? "?"} documents, ${h.chunks ?? "?"} passages, ${h.people ?? "?"} people, ${h.edges ?? "?"} graph edges · Embeddings: ${p.embedding_backend === "ollama" ? "nomic-embed-text (local Ollama container)" : "offline hashed embeddings"} · Answer text is verbatim from the cited passages, so nothing can be hallucinated.</p>`;
-  $("#tab-trace").innerHTML = html;
+  setHTML($("#tab-trace"), html);
 }
 
 const REL_TEXT = { owns: "owns it", authored: "wrote it", edited: "edited it", reviewed: "reviewed it", attended: "attended the meeting", assigned: "is assigned to it", answered: "answered on it", consulted: "was consulted on it" };
@@ -421,7 +431,7 @@ function openEvidence(id) {
   const e = state.evidenceById[id];
   if (!e) return;
   const s = e.trust.signals;
-  $("#modal-body").innerHTML = `
+  setHTML($("#modal-body"), `
     <button class="close" data-close>✕</button>
     <h3><span class="ev-id ${e.contested ? "contested" : ""}" style="padding:0 8px">${e.id}</span> ${esc(e.title)}</h3>
     <div class="sub">${evidenceMeta(e)}${e.version ? `<span>v${esc(e.version)}</span>` : ""}</div>
@@ -436,7 +446,7 @@ function openEvidence(id) {
     <div class="modal-actions">
       <a class="btn secondary" href="${esc(e.url)}" target="_blank" rel="noopener">Open in ${esc(e.source_system)} ↗</a>
       <button class="btn" data-doc="${esc(e.document_id)}" data-from="${e.line_start}" data-to="${e.line_end}">Open document at line ${e.line_start}</button>
-    </div>`;
+    </div>`);
   $("#modal").classList.remove("hidden");
 }
 
@@ -449,7 +459,7 @@ async function openDocument(id, from, to) {
     const h = t.startsWith("## ") || n === 1 ? "h" : "";
     return `<div class="line ${hl} ${h}" ${n === from ? 'id="target-line"' : ""}><span class="ln">${n}</span><span class="lt">${esc(t.replace(/^## /, ""))}</span></div>`;
   }).join("");
-  $("#drawer-body").innerHTML = `
+  setHTML($("#drawer-body"), `
     <button class="close" data-close>✕</button>
     <div class="doc-head">
       <div class="sub" style="margin-bottom:6px"><span class="doctype ${esc(d.doc_type)}">${esc(d.doc_type)}</span><span>${esc(d.source_system)}</span>${d.version ? `<span>v${esc(d.version)}</span>` : ""}</div>
@@ -470,7 +480,7 @@ async function openDocument(id, from, to) {
       <button class="act ${d.review_due ? "primary" : ""}" type="button" data-action="validate" data-doc="${esc(d.id)}" data-inline="1">Confirm still valid</button>
     </div>
     <div class="doc-lines">${lines}</div>
-    ${d.versions && d.versions.length ? `<h4 class="hist-title">History</h4><ul class="track hist">${d.versions.map((v) => `<li><b>v${v.version_no}</b> · ${fmtDate(v.changed_at)}${v.changed_by ? " · " + esc(v.changed_by) : ""} · ${esc(v.change_summary || "")}</li>`).join("")}</ul>` : `<p class="muted" style="font-size:12.5px;margin-top:12px">Seeded document. Changes picked up by a sync will appear here as versions with a summary of what changed.</p>`}`;
+    ${d.versions && d.versions.length ? `<h4 class="hist-title">History</h4><ul class="track hist">${d.versions.map((v) => `<li><b>v${v.version_no}</b> · ${fmtDate(v.changed_at)}${v.changed_by ? " · " + esc(v.changed_by) : ""} · ${esc(v.change_summary || "")}</li>`).join("")}</ul>` : `<p class="muted" style="font-size:12.5px;margin-top:12px">Seeded document. Changes picked up by a sync will appear here as versions with a summary of what changed.</p>`}`);
   $("#drawer").classList.remove("hidden");
   requestAnimationFrame(() => { const t = $("#target-line"); if (t) t.scrollIntoView({ block: "center" }); });
 }
@@ -479,7 +489,7 @@ async function openDocument(id, from, to) {
 function openAddKnowledge(pane = "write", prefill = null) {
   const m = state.meta;
   const me = (prefill && prefill.owner_id) || $("#user").value;
-  $("#modal-body").innerHTML = `
+  setHTML($("#modal-body"), `
     <button class="close" data-close>✕</button>
     <h3>Add knowledge</h3>
     <div class="tabs small" style="margin:10px 0 16px">
@@ -514,7 +524,7 @@ POST /api/ingest/meeting        {"id", "subject", "transcript", "createdDateTime
 POST /api/connectors/{name}/sync?since=YYYY-MM-DD</pre>
         <p>Live mode needs the environment variables listed per connector (Microsoft Graph app registration for SharePoint, Teams, Outlook and Meetings; an Atlassian API token for Jira and Confluence).</p>
       </details>
-    </div>`;
+    </div>`);
   $("#modal").classList.remove("hidden");
   $("#modal-body").querySelectorAll("[data-pane]").forEach((b) => b.addEventListener("click", () => {
     $("#modal-body").querySelectorAll("[data-pane]").forEach((x) => x.classList.toggle("active", x === b));
@@ -540,7 +550,7 @@ async function loadConnectors() {
   const tasks = Object.entries(fr.open_tasks || {}).map(([k, v]) => `${v} ${({ request_update: "update requests", confirm_valid: "reviews pending", reassign_owner: "orphaned" })[k] || k}`).join(", ");
   const fresh = `<div class="freshline"><b>Freshness</b> ${fr.fresh_180d}/${fr.documents} documents touched in the last 180 days · ${fr.review_overdue} review${fr.review_overdue === 1 ? "" : "s"} overdue · ${fr.versions_recorded} versions recorded${tasks ? " · " + tasks : ""}<br><span class="muted">Every connector delta-syncs every ${fr.auto_sync_minutes} min and on webhook; unchanged documents are skipped by content hash, changed ones get a new version and only changed sections are re-embedded. Overdue documents raise a "confirm still valid" task for their owner.</span> <button class="linkbtn slim" type="button" id="sweepbtn">Run freshness sweep</button></div>`;
   const ago = (iso) => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : `${Math.round(m / 60)} h ago`; };
-  el.innerHTML = fresh + list.map((c) => `
+  setHTML(el, fresh + list.map((c) => `
     <div class="connector" data-connector="${esc(c.name)}">
       <div class="connector-main">
         <div class="connector-top"><b>${esc(c.label)}</b><span class="badge ${c.mode === "live" ? "ok" : "grey"}" title="${c.mode === "live" ? "Credentials found" : "No credentials set: " + c.required_env.join(", ")}">${c.mode === "live" ? "Live" : "Demo data"}</span><span class="muted">${c.documents} document${c.documents === 1 ? "" : "s"}</span></div>
@@ -548,7 +558,7 @@ async function loadConnectors() {
         <div class="connector-last muted">${c.last_sync ? `Last sync ${ago(c.last_sync.finished_at)} (${c.last_sync.trigger}): ${c.last_sync.fetched} fetched, ${c.last_sync.inserted} new, ${c.last_sync.updated} changed, ${c.last_sync.unchanged} unchanged${c.last_sync.archived ? ", " + c.last_sync.archived + " archived" : ""}` : "Never synced"}</div>
       </div>
       <button class="act primary" type="button" data-sync="${esc(c.name)}">Sync now</button>
-    </div>`).join("");
+    </div>`).join(""));
   const sw = $("#sweepbtn");
   if (sw) sw.addEventListener("click", async () => { const r = await fetch("/api/freshness/sweep", { method: "POST" }).then((x) => x.json()); toast(`Sweep: ${r.confirm_valid} review request${r.confirm_valid === 1 ? "" : "s"}, ${r.reassign_owner} orphaned document${r.reassign_owner === 1 ? "" : "s"} flagged`); loadConnectors(); });
   el.querySelectorAll("[data-sync]").forEach((b) => b.addEventListener("click", async () => {
@@ -563,7 +573,7 @@ async function loadConnectors() {
 
 function toast(msg, action) {
   const t = $("#toast");
-  t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button type="button">${esc(action.label)}</button>` : ""}`;
+  setHTML(t, `<span>${esc(msg)}</span>${action ? `<button type="button">${esc(action.label)}</button>` : ""}`);
   if (action) t.querySelector("button").addEventListener("click", () => { t.classList.add("hidden"); action.fn(); });
   t.classList.remove("hidden");
   clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.add("hidden"), 6000);
