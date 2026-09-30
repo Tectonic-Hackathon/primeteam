@@ -33,10 +33,10 @@ def main():
         for d in DOCS:
             body, chunks = build_body(d)
             cur.execute("""INSERT INTO documents (id, title, doc_type, source_system, country, client, team, product, topics, owner_id, author_id,
-                                                  created_at, updated_at, version, supersedes_id, location, url, body)
+                                                  created_at, updated_at, version, supersedes_id, location, url, body, date_known)
                            VALUES (%(id)s, %(title)s, %(doc_type)s, %(source_system)s, %(country)s, %(client)s, %(team)s, %(product)s, %(topics)s,
-                                   %(owner_id)s, %(author_id)s, %(created_at)s, %(updated_at)s, %(version)s, %(supersedes_id)s, %(location)s, %(url)s, %(body)s)""",
-                        {**d, "body": body})
+                                   %(owner_id)s, %(author_id)s, %(created_at)s, %(updated_at)s, %(version)s, %(supersedes_id)s, %(location)s, %(url)s, %(body)s, %(date_known)s)""",
+                        {**{"date_known": True}, **d, "body": body})
             for heading, start, end, text in chunks:
                 cur.execute("""INSERT INTO chunks (document_id, section, line_start, line_end, text, topics, embedding)
                                VALUES (%s, %s, %s, %s, %s, %s, %s)""",

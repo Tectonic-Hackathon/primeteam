@@ -14,8 +14,15 @@ def ask(conn, question: str, user: dict | None = None) -> dict:
     ctx = context.resolve(question, user)
     subs = planner.plan(question, ctx)
     per_sub = []
-    for sub in subs:
-        cands = retrieval.retrieve(conn, sub, ctx)
+    all_cands = [retrieval.retrieve(conn, sub, ctx) for sub in subs]
+    if not ctx["country"]:
+        top = sorted((c for cs in all_cands for c in cs), key=lambda c: -c["relevance"])[:3]
+        countries = {c["country"] for c in top if c["country"]}
+        if len(countries) == 1 and top and top[0]["country"]:
+            ctx["country"] = top[0]["country"]
+            ctx["country_name"] = COUNTRY_NAMES[ctx["country"]]
+            ctx["country_source"] = f"inferred from the most relevant documents ({top[0]['title']})"
+    for sub, cands in zip(subs, all_cands):
         ids = [c["chunk_id"] for c in cands]
         embeddings = {}
         if ids:

@@ -1,7 +1,8 @@
 /* Grounded – front end. Vanilla JS, no build step. */
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const fmtDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "no date";
+const evDate = (e) => (e.date_known === false ? "no date" : fmtDate(e.updated_at));
 const pct = (x) => Math.round(x * 100);
 
 const state = { result: null, evidenceById: {}, meta: null, people: [], peopleById: {} };
@@ -150,6 +151,8 @@ function renderAnswer(r) {
       if (seg.kind === "primary") {
         html += `<p class="lead">${esc(seg.lead || seg.text)}${seg.evidence.map(citeChip).join("")}</p>`;
         if (seg.rest) html += `<p class="detail">${esc(seg.rest)}</p>`;
+      } else if (seg.kind === "disclaimer") {
+        html += `<p class="lead muted-lead">Not enough verified information to answer this.</p><p class="answer-text supporting"><span class="kicker">The documents say</span>${esc(seg.text)}${seg.evidence.map(citeChip).join("")}</p>`;
       } else if (seg.kind === "weak") {
         html += `<p class="answer-text weak"><span class="kicker">Closest match</span>${esc(seg.text)}${seg.evidence.map(citeChip).join("")}</p>`;
       } else {
@@ -163,7 +166,7 @@ function renderAnswer(r) {
       bits.push(`Confirm with ${s.experts.slice(0, 2).map((p) => `<b>${esc(p.name)}</b>`).join(" or ")}.`);
     }
     if (bits.length) html += `<div class="note ${s.status === "missing" ? "gap" : s.status === "contested" ? "warn" : ""}">${bits.join(" ")}</div>`;
-    if (s.status === "missing") {
+    if (s.status === "missing" && !s.segments.some((x) => x.kind === "disclaimer")) {
       html += `<p class="lead muted-lead">No grounded answer in the knowledge base${c.country_name ? ` for ${esc(c.country_name)}` : ""}.</p><p class="detail">Nothing is claimed without evidence. The people listed alongside are the most likely to know, ranked by their track record on this topic.</p>`;
     }
     html += `</div>`;
@@ -234,7 +237,7 @@ function evidenceMeta(e) {
     <span>${esc(e.source_system)}</span>
     <span>${esc(e.country_name)}${e.client ? " · " + esc(e.client) : ""}</span>
     <span>${e.owner ? "Owner: " + esc(e.owner) + (e.owner_active === false ? " (left)" : "") : e.author ? "Author: " + esc(e.author) + " (no owner)" : "No owner"}</span>
-    <span>Updated ${fmtDate(e.updated_at)}</span>`;
+    <span>${e.date_known === false ? "No date on record" : "Updated " + fmtDate(e.updated_at)}</span>`;
 }
 
 function renderEvidence(r) {
@@ -246,14 +249,14 @@ function renderEvidence(r) {
       <div class="ev-id ${e.contested ? "contested" : ""}">${e.id}</div>
       <div style="min-width:0">
         <div class="ev-title">${esc(e.title)}</div>
-        <div class="ev-meta"><span class="doctype ${esc(e.doc_type)}">${esc(e.doc_type)}</span><span>${e.owner ? esc(e.owner) : e.author ? esc(e.author) + " (no owner)" : "No owner"}</span><span>${fmtDate(e.updated_at)}</span><span>§ ${esc(e.section)}, lines ${e.line_start}–${e.line_end}</span></div>
+        <div class="ev-meta"><span class="doctype ${esc(e.doc_type)}">${esc(e.doc_type)}</span><span>${e.owner ? esc(e.owner) : e.author ? esc(e.author) + " (no owner)" : "No owner"}</span><span>${evDate(e)}</span><span>§ ${esc(e.section)}, lines ${e.line_start}–${e.line_end}</span></div>
       </div>
       <div class="conf"><span title="Confidence: how well this passage matches the question and how much it can be trusted">${pct(e.confidence)}%</span><button class="eye" type="button" data-ev="${e.id}" title="Why this confidence">${EYE}</button></div>
     </div>`).join("");
 }
 
 function shortMeta(e) {
-  return `<span class="doctype ${esc(e.doc_type)}">${esc(e.doc_type)}</span>${statusTag(e)}<span>${e.owner ? esc(e.owner) + (e.owner_active === false ? " (left)" : "") : e.author ? esc(e.author) + " (no owner)" : "no owner"}</span><span>${fmtDate(e.updated_at)}</span>`;
+  return `<span class="doctype ${esc(e.doc_type)}">${esc(e.doc_type)}</span>${statusTag(e)}<span>${e.owner ? esc(e.owner) + (e.owner_active === false ? " (left)" : "") : e.author ? esc(e.author) + " (no owner)" : "no owner"}</span><span>${evDate(e)}</span>`;
 }
 
 const who = (e) => e.owner || e.author || "an unknown author";
@@ -279,6 +282,12 @@ function renderReview(r) {
   for (const c of rv.conflicts) {
     const k = c.kept, j = c.rejected;
     const facts = (d, side) => `<b>${esc(side === "k" ? d.kept : d.rejected)} ${esc(d.unit)}</b>`;
+    if (c.same_document) {
+      const headline = `Inside <b>${esc(k.title)}</b>, the section “${esc(k.section)}” says ${c.diffs.map((d) => facts(d, "k")).join(", ")} but the section “${esc(j.section)}” still says ${c.diffs.map((d) => facts(d, "r")).join(", ")}.`;
+      html += issueCard(++n, "warn", "Conflict in document", headline, `The answer uses the current rule. ${esc(c.reason)}`,
+        A(`Ask ${esc(who(k))} to remove the old paragraph`, "request_update", k.document_id, `data-note="Section '${esc(j.section)}' contradicts section '${esc(k.section)}'; please remove the retained old text"`, "primary"), [k]);
+      continue;
+    }
     const headline = `The ${typeName(j)} from ${esc(who(j))} (${fmtDate(j.updated_at)}) says ${c.diffs.map((d) => facts(d, "r")).join(", ")}. The ${typeName(k)} owned by ${esc(who(k))} (${fmtDate(k.updated_at)}) says ${c.diffs.map((d) => facts(d, "k")).join(", ")}.`;
     const did = `The answer uses the ${typeName(k)}. ${esc(c.reason)}`;
     const actions =
@@ -295,6 +304,26 @@ function renderReview(r) {
     const i = o.item;
     const headline = `<b>${esc(i.title)}</b> is an old version that people can still find. ${esc(i.trust.signals.supersession.note)}.`;
     html += issueCard(++n, "", "Outdated", headline, `The answer uses the newer version.`, A("Archive the old version", "archive", i.document_id, "", "primary") + (i.owner_active === false ? `<span class="act-note">Owner ${esc(who(i))} has left, so nobody will update it.</span>` : A(`Ask ${esc(who(i))} to archive it`, "request_update", i.document_id, `data-note="Superseded version still findable"`)), [i]);
+  }
+  for (const u of rv.unofficial || []) {
+    const i = u.item;
+    let headline = `<b>${esc(i.title)}</b> has ${i.owner || i.author ? "no date" : i.date_known === false ? "no owner and no date" : "no owner"}, so it is never used as a source (knowledge governance: documents without an owner or date are not official).`;
+    if (u.resembles) headline += ` It looks like a copy of <b>${esc(u.resembles.title)}</b>${u.diffs && u.diffs.length ? ` but says ${u.diffs.map((d) => `<b>${esc(d.rejected)} ${esc(d.unit)}</b>`).join(", ")} instead of ${u.diffs.map((d) => `<b>${esc(d.kept)} ${esc(d.unit)}</b>`).join(", ")}` : ""}.`;
+    const adopter = u.resembles ? who(u.resembles) : null;
+    const adopterId = u.resembles ? (u.resembles.owner_id || u.resembles.author_id) : null;
+    html += issueCard(++n, "warn", "Unofficial", headline, `Consultants who find it may still follow it.`,
+      A("Archive it", "archive", i.document_id, "", "primary") + (adopterId ? A(`Ask ${esc(adopter)} to adopt or remove it`, "request_update", i.document_id, `data-assignee="${esc(adopterId)}" data-note="Unofficial copy without owner or date; adopt it as owner or have it removed"`) : ""),
+      u.resembles ? [i, u.resembles] : [i]);
+  }
+  for (const u of rv.undocumented || []) {
+    const i = u.item;
+    const author = i.author || i.owner || "the author";
+    const authorId = i.author_id || i.owner_id;
+    const captureText = i.text.replace(/^[A-Z][\w .'-]{1,30}:\s*/, "");
+    const headline = `Only a ${typeName(i)} from ${esc(author)} (${evDate(i)}) answers this. No approved document exists, so the answer is shown as informal.`;
+    html += issueCard(++n, "warn", "Undocumented", headline, `Knowledge governance: the country expert captures the answer in a new document.`,
+      A("Capture it as a note now", "capture", i.document_id, `data-title="${esc(r.question.replace(/\?$/, ""))}" data-text="${esc(captureText)}" data-country="${esc(r.context.country || "")}" data-owner="${esc(authorId || "")}" data-topics="${esc((u.topics || []).join(","))}"`, "primary") +
+      (authorId ? A(`Ask ${esc(author)} to write the procedure`, "request_update", i.document_id, `data-note="Please capture this in an official document"`) : ""), [i]);
   }
   for (const o of rv.stale || []) {
     const i = o.item;
@@ -332,12 +361,16 @@ async function reviewAction(btn) {
     done.classList.remove("hidden");
   };
   if (action === "dismiss") { finish("Dismissed for this question."); return; }
+  if (action === "capture") {
+    openAddKnowledge("write", { title: btn.dataset.title, text: btn.dataset.text, country: btn.dataset.country, owner_id: btn.dataset.owner, topics: (btn.dataset.topics || "").split(",").filter(Boolean), doc_type: "wiki" });
+    return;
+  }
   if (action === "restore") {
     await fetch("/api/review/action", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "restore", document_id: doc }) });
     issue.classList.remove("resolved"); done.classList.add("hidden"); toast("Restored"); return;
   }
   btn.disabled = true;
-  const res = await fetch("/api/review/action", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, document_id: doc, question: state.result.question, actor_id: $("#user").value || null, note: btn.dataset.note || null }) }).then((x) => x.json());
+  const res = await fetch("/api/review/action", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, document_id: doc, question: state.result.question, actor_id: $("#user").value || null, note: btn.dataset.note || null, assignee_id: btn.dataset.assignee || null }) }).then((x) => x.json());
   btn.disabled = false;
   if (action === "validate") finish(`“${esc(res.title)}” confirmed still valid today. Freshness restored.`, null);
   else if (action === "retract") finish(`“${esc(res.title)}” retracted. It will not be used in answers again.`, doc);
@@ -443,9 +476,9 @@ async function openDocument(id, from, to) {
 }
 
 /* Add knowledge: a user or a meeting agent adds a note or decision; it is embedded and citable at once. */
-function openAddKnowledge(pane = "write") {
+function openAddKnowledge(pane = "write", prefill = null) {
   const m = state.meta;
-  const me = $("#user").value;
+  const me = (prefill && prefill.owner_id) || $("#user").value;
   $("#modal-body").innerHTML = `
     <button class="close" data-close>✕</button>
     <h3>Add knowledge</h3>
@@ -456,17 +489,18 @@ function openAddKnowledge(pane = "write") {
     <div id="pane-write" class="${pane === "write" ? "" : "hidden"}">
       <p class="muted" style="font-size:13px;margin:0 0 12px">Notes, decisions and answers you would otherwise leave in a chat. Indexed immediately, owned by you, citable in the next question.</p>
       <form id="addform" class="form">
-        <label>Title<input name="title" required placeholder="e.g. Decision: Colruyt meal voucher provider from 2027"></label>
-        <label>Content<textarea name="text" required placeholder="Write it as you would tell a colleague. One fact per sentence works best."></textarea></label>
+        ${prefill ? `<div class="note">Captured from an informal source. Check the wording, pick the owner who should stand behind it, and save. It becomes an owned, dated note that outranks the chat.</div>` : ""}
+        <label>Title<input name="title" required placeholder="e.g. Decision: Colruyt meal voucher provider from 2027" value="${prefill ? esc(prefill.title) : ""}"></label>
+        <label>Content<textarea name="text" required placeholder="Write it as you would tell a colleague. One fact per sentence works best.">${prefill ? esc(prefill.text) : ""}</textarea></label>
         <div class="row">
           <label>Type<select name="doc_type"><option value="wiki">Note</option><option value="meeting">Meeting decision</option><option value="analysis">Analysis</option><option value="email">Email</option><option value="chat">Chat message</option></select></label>
           <label>Owner<select name="owner_id">${state.people.filter((p) => p.active).map((p) => `<option value="${p.id}" ${p.id === me ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
         </div>
         <div class="row">
-          <label>Country<select name="country"><option value="">Global</option>${m.countries.map((c) => `<option value="${c.id}">${esc(c.label)}</option>`).join("")}</select></label>
+          <label>Country<select name="country"><option value="">Global</option>${m.countries.map((c) => `<option value="${c.id}" ${prefill && prefill.country === c.id ? "selected" : ""}>${esc(c.label)}</option>`).join("")}</select></label>
           <label>Client<select name="client"><option value="">None</option>${m.clients.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}</select></label>
         </div>
-        <label>Topics<div class="topics-pick">${m.topics.map((t) => `<label><input type="checkbox" name="topics" value="${t.id}">${esc(t.label)}</label>`).join("")}</div></label>
+        <label>Topics<div class="topics-pick">${m.topics.map((t) => `<label><input type="checkbox" name="topics" value="${t.id}" ${prefill && prefill.topics && prefill.topics.includes(t.id) ? "checked" : ""}>${esc(t.label)}</label>`).join("")}</div></label>
         <div class="modal-actions"><button type="button" class="btn secondary" data-close>Cancel</button><button type="submit" class="btn">Add to knowledge base</button></div>
       </form>
     </div>

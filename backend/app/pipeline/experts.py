@@ -6,7 +6,7 @@ from ..config import TODAY
 
 _REL_VERB = {
     "owns": "owns", "authored": "authored", "edited": "edited", "answered": "answered a question in",
-    "consulted": "was consulted on", "attended": "attended", "assigned": "is assigned", "reviewed": "reviewed",
+    "consulted": "was consulted on", "attended": "attended", "assigned": "is assigned", "reviewed": "reviewed", "listed": "is listed in the expertise directory for",
 }
 
 
@@ -60,8 +60,8 @@ class Reputation:
     def find(self, topics: list[str], country: str | None, limit: int = 4) -> list[dict]:
         out = []
         for pid, p in self.people.items():
-            if not p["active"]:
-                continue
+            if not p["active"] or "team" in p["role"].lower() and p["seniority_years"] == 0:
+                continue  # shared mailboxes and team entities own documents but are not people to ask
             r = self(pid, topics, country)
             if r["events"] == 0:
                 continue

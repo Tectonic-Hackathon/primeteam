@@ -36,17 +36,29 @@ Reseed after editing the corpus: `cd backend && ../.venv/bin/python seed/seed.py
 
 ## Demo script
 
-1. *Notice period, Belgium, 5 years* → answer from policy v2; review shows the 2021 v1 (owner left) as outdated and a personal copy as duplicate.
-2. *Guaranteed salary during sick leave, Belgium* → owned manual wins over a fresher CTO Teams message saying 60 days; legal email confirms; conflict shown side by side with the reason.
-3. *Vacation days, Netherlands* → Dutch policy answers; Belgian policy shown under **Wrong scope**.
-4. *Meal voucher face value for Colruyt + provider after the switch* → part one answered from a procedure, part two only from an open Jira ticket, so it is marked informal and routed to Nadia and Amira.
-5. *What did we decide about holiday pay for Delhaize* → the meeting's Decision line, backed by the related ticket.
-6. *Notice period, France* → no evidence; closest experts listed with why.
-7. **Add knowledge** (top bar) as Nadia: title "Decision: Colruyt meal voucher provider from 2027", type *Meeting decision*,
-   country Belgium, client Colruyt, topics *Voucher providers* + *Meal vouchers*, text
-   "Colruyt procurement confirmed Pluxee as the meal voucher provider from 1 January 2027. eBlox export format PLX-2 must be
-   configured for the Colruyt client before the December 2026 run." Then re-ask question 4: part two is now a grounded
-   answer from the new decision and the ticket drops to *Earlier*.
+The corpus merges three fictional datasets: our own HR/payroll set, the team's **payroll cutoff** set (branch `demo-dataset`)
+and the team's **parental leave / Northstar** set (branch `demo-dataset-2`, `SDWorx_Simple_Trust_Demo`). The example chips on the
+landing page run these, in order:
+
+| Question | What it shows |
+|---|---|
+| Laura's contractual salary at 80% or 100% during 1/5 parental leave? | Country and client resolved from the employee (Northstar, Belgium). Answer 80% from guide v3. Issues: the guide's own retained old paragraph (100%), Client Service email (100%, says itself it relies on old material), legacy 2022 procedure whose owner left, Dutch document out of scope. |
+| How much public parental-leave allowance will Laura receive? | Refuses: the guide states explicitly that it does not determine the allowance. Nothing is claimed; Amélie Dubois (benefits specialist, from the expertise directory) is the person to ask. |
+| Deadline for payroll changes, Belgian client? | 5 working days from procedure v3. Issues: Client Service FAQ says 2 days (conflict, procedure leads per governance policy), quick guide without owner or date (unofficial, looks like a copy saying 4 days), v1 from 2021 (outdated). Lotte Vermeulen is the expert. |
+| Payroll change deadline for French clients? | Only a Teams message from Julien Moreau answers. Marked informal, with an *Undocumented* issue: capture it as a note in one click, or ask Julien to write the procedure. |
+| Multiple versions of the Belgian cutoff procedure? | Yes: v1 (2021) still exists and is excluded; v3 is used. |
+| Who can I ask about the Belgian cutoff rule? | Contact line from v3 and Lotte Vermeulen as expert. Marc Peeters (left) is never suggested. |
+| The FAQ and the procedure disagree, who decides? | Governance policy: the procedure owner decides. Eva Claes and Lotte Vermeulen suggested. |
+| Payroll change deadline for Dutch payrolls? | 7 working days from the Dutch procedure; Belgian sources shown as wrong country. |
+| Payroll change deadline in Germany? | Nothing known, nothing invented. Closest expertise shown with a note that no German specialist exists. |
+| Guaranteed salary during sick leave, Belgium (our set) | Owned manual beats a fresher CTO Teams message (60 days vs 30); legal email confirms; manual flagged *Review overdue*. |
+
+More of our own scenarios (notice period versions and duplicate copy, Colruyt two-part question, Delhaize meeting decision,
+Siemens 13th month) are under *More examples*. Adding knowledge live: **Add knowledge** → write a note, or *Connected sources* → Sync.
+
+Known gaps: "Is a correction run free?" currently leads with the deadline sentence of the right procedure instead of its
+correction-run sentence (the conflict itself is detected); "Can I trust the quick guide?" has no country in the question and the
+scope inference is not decisive yet. Both are left out of the example chips.
 
 ## Ranking rules worth saying out loud in the pitch
 

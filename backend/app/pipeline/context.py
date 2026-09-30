@@ -1,6 +1,6 @@
 """Step 1: resolve the context a question is asked in (country, client, team, intent, topics)."""
 import re
-from ..taxonomy import COUNTRIES, COUNTRY_NAMES, CLIENTS, TEAMS, TOPICS, INTENTS
+from ..taxonomy import COUNTRIES, COUNTRY_NAMES, CLIENTS, CLIENT_EMPLOYEES, TEAMS, TOPICS, INTENTS
 
 
 def _contains(text: str, phrase: str) -> bool:
@@ -27,6 +27,12 @@ def resolve(question: str, user: dict | None = None) -> dict:
         if _contains(q, name.lower()):
             client, country, country_source = name, c, f"client {name} is a {COUNTRY_NAMES[c]} account"
             break
+    if not client:
+        for emp, cl in CLIENT_EMPLOYEES.items():
+            if _contains(q, emp):
+                client, country = cl, CLIENTS[cl]
+                country_source = f"{emp.title()} is an employee of client {cl} ({COUNTRY_NAMES[country]}), per the HR system"
+                break
     if not country:
         for code, kws in COUNTRIES.items():
             if any(_contains(q, k) for k in kws):

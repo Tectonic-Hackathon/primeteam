@@ -17,6 +17,9 @@ def score(chunk: dict, ctx: dict, people: dict, superseded_by: dict, reputation)
     freshness = 0.5 ** (age / hl)
     from ..freshness import review_due
     stale, period = review_due(chunk["doc_type"], chunk["updated_at"], validated)
+    date_known = chunk.get("date_known", True)
+    if not date_known:
+        freshness, stale = 0.2, False
 
     owner = people.get(chunk["owner_id"]) if chunk["owner_id"] else None
     author = people.get(chunk["author_id"]) if chunk["author_id"] else None
@@ -59,8 +62,9 @@ def score(chunk: dict, ctx: dict, people: dict, superseded_by: dict, reputation)
         "total": round(total, 3),
         "in_scope": in_scope,
         "stale": stale,
+        "unofficial": not owner and not author and not date_known,  # governance: no owner or date → never an official source
         "signals": {
-            "freshness": {"value": round(freshness, 2), "note": (f"Owner confirmed still valid on {validated.isoformat()}" if validated and validated > chunk["updated_at"] else f"Updated {chunk['updated_at'].isoformat()}") + f" ({age} days ago); review period for a {chunk['doc_type']} is {period} days" + (", overdue" if stale else "")},
+            "freshness": {"value": round(freshness, 2), "note": "No date on record, so freshness cannot be assessed" if not date_known else (f"Owner confirmed still valid on {validated.isoformat()}" if validated and validated > chunk["updated_at"] else f"Updated {chunk['updated_at'].isoformat()}") + f" ({age} days ago); review period for a {chunk['doc_type']} is {period} days" + (", overdue" if stale else "")},
             "owner": {"value": round(owner_score, 2), "note": owner_note},
             "scope": {"value": round(scope, 2), "note": scope_note},
             "authority": {"value": round(authority, 2), "note": authority_note},

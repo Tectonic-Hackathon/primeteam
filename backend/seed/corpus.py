@@ -242,3 +242,206 @@ EDGES = [
     ("lena", "answered", "topic:thirteenth_month", "2025-11-20", "#payroll-de"),
     ("marc", "edited", "doc:MAN-BE-SICK", "2023-02-03", "initial formatting"),
 ]
+
+
+# =====================================================================================================================
+# Team dataset 1 (branch demo-dataset): payroll change cutoff. Fictional test data for the Tectonic Hackathon.
+# =====================================================================================================================
+PEOPLE += [
+    dict(id="lotte", name="Lotte Vermeulen", role="Payroll procedure owner, Payroll Operations Belgium", team="Payroll BE", country="BE", seniority_years=9, email="lotte.vermeulen@sdworx.com", active=True),
+    dict(id="marcp", name="Marc Peeters", role="Payroll Consultant (left 2024)", team="Payroll BE", country="BE", seniority_years=6, email=None, active=False),
+    dict(id="eva", name="Eva Claes", role="Knowledge governance owner", team="Knowledge Management", country="BE", seniority_years=7, email="eva.claes@sdworx.com", active=True),
+    dict(id="sanne", name="Sanne de Vries", role="Payroll procedure owner, Payroll Operations Netherlands", team="Payroll NL", country="NL", seniority_years=8, email="sanne.devries@sdworx.com", active=True),
+    dict(id="julien", name="Julien Moreau", role="Payroll country expert", team="Payroll FR", country="FR", seniority_years=6, email="julien.moreau@sdworx.com", active=True),
+    dict(id="pieterw", name="Pieter Wouters", role="Payroll Consultant", team="Payroll BE", country="BE", seniority_years=2, email="pieter.wouters@sdworx.com", active=True),
+    dict(id="nadiab", name="Nadia Bouzid", role="Payroll Consultant", team="Payroll FR", country="FR", seniority_years=3, email="nadia.bouzid@sdworx.com", active=True),
+    dict(id="csbe", name="Client Service Team Belgium", role="Shared team mailbox", team="Client Service BE", country="BE", seniority_years=0, email="clientservice.be@sdworx.com", active=True),
+]
+
+DOCS += [
+    dict(id="PAYBE014-v3", title="Payroll Change Cutoff Procedure, Belgium (v3)", doc_type="procedure", source_system="SharePoint",
+         country="BE", client=None, team="Payroll", product=None, topics=["payroll_cutoff"],
+         owner_id="lotte", author_id="lotte", created_at="2025-05-12", updated_at="2025-05-12", version="3.0",
+         supersedes_id="PAYBE014-v1", location="SharePoint › Payroll BE › Procedures › PAYBE014", url="https://sdworx.sharepoint.com/pay-be/procedures/PAYBE014-v3.docx",
+         sections=[
+             ("Rule", ["For Belgian payrolls, all payroll changes must reach SD Worx at the latest 5 working days before payday.",
+                       "Payroll changes include new hires, salary changes, absences, terminations, bonuses and one time payments."]),
+             ("Late changes", ["Payroll changes received after the cutoff are processed in the next payroll run.",
+                               "A correction run can be requested for the current month and is charged separately."]),
+             ("Exceptions", ["Only urgent terminations with a final pay obligation can be processed after the cutoff, with approval from the team lead."]),
+             ("Contact", ["Questions about the Belgian payroll cutoff procedure go to Lotte Vermeulen, Payroll Operations Belgium."]),
+         ]),
+    dict(id="PAYBE014-v1", title="Payroll Change Cutoff Procedure, Belgium (v1, old)", doc_type="procedure", source_system="SharePoint",
+         country="BE", client=None, team="Payroll", product=None, topics=["payroll_cutoff"],
+         owner_id="marcp", author_id="marcp", created_at="2021-02-18", updated_at="2021-02-18", version="1.0",
+         supersedes_id=None, location="SharePoint › Payroll BE › Procedures › PAYBE014 (not archived)", url="https://sdworx.sharepoint.com/pay-be/procedures/PAYBE014-v1.docx",
+         sections=[
+             ("Rule", ["For Belgian payrolls, all payroll changes must reach SD Worx at the latest 3 working days before payday."]),
+             ("Late changes", ["Payroll changes received after the cutoff are processed in the next payroll run."]),
+             ("Exceptions", ["No exceptions are allowed after the payroll cutoff."]),
+             ("Contact", ["Questions about the Belgian payroll cutoff procedure go to Marc Peeters."]),
+         ]),
+    dict(id="QG-CUTOFF", title="Payroll Cutoff Quick Guide", doc_type="wiki", source_system="SharePoint",
+         country="BE", client=None, team="Payroll", product=None, topics=["payroll_cutoff"],
+         owner_id=None, author_id=None, created_at="2024-01-01", updated_at="2024-01-01", version=None, date_known=False,
+         supersedes_id=None, location="SharePoint › Payroll BE › Shared › quick-guide.docx (no metadata)", url="https://sdworx.sharepoint.com/pay-be/shared/quick-guide.docx",
+         sections=[
+             ("Quick summary for consultants", ["Clients must send all payroll changes 4 working days before payday.",
+                                                "If a client sends payroll changes too late, they go into the next payroll run.",
+                                                "A correction run is possible but costs extra.",
+                                                "Urgent terminations can be handled after the cutoff with approval.",
+                                                "Copied from the official procedure for easy reference."]),
+         ]),
+    dict(id="PAYNL009", title="Payroll Change Cutoff Procedure, Netherlands", doc_type="procedure", source_system="SharePoint",
+         country="NL", client=None, team="Payroll", product=None, topics=["payroll_cutoff"],
+         owner_id="sanne", author_id="sanne", created_at="2025-08-20", updated_at="2025-08-20", version="2.1",
+         supersedes_id=None, location="SharePoint › Payroll NL › Procedures › PAYNL009", url="https://sdworx.sharepoint.com/pay-nl/procedures/PAYNL009.docx",
+         sections=[
+             ("Rule", ["For Dutch payrolls, all payroll changes must reach SD Worx at the latest 7 working days before payday."]),
+             ("Late changes", ["Payroll changes received after the cutoff are processed in the next payroll run.",
+                               "Correction runs are not available for Dutch payrolls."]),
+             ("Exceptions", ["No exceptions are allowed after the payroll cutoff for Dutch payrolls."]),
+             ("Contact", ["Questions about the Dutch payroll cutoff procedure go to Sanne de Vries, Payroll Operations Netherlands."]),
+         ]),
+    dict(id="CSBE003", title="Client Service FAQ, Belgium", doc_type="wiki", source_system="Confluence",
+         country="BE", client=None, team="Client Service", product=None, topics=["payroll_cutoff"],
+         owner_id="csbe", author_id="csbe", created_at="2025-03-03", updated_at="2025-03-03", version="1.4",
+         supersedes_id=None, location="Confluence › Client Service BE › FAQ › CSBE003", url="https://sdworx.atlassian.net/wiki/spaces/CSBE/pages/CSBE003",
+         sections=[
+             ("Until when can clients send payroll changes?", ["Clients can send payroll changes up to 2 working days before payday."]),
+             ("Can clients request a correction run?", ["Clients can always request a correction run for free."]),
+             ("Who can clients contact with payroll questions?", ["Clients contact their dedicated payroll consultant."]),
+         ]),
+    dict(id="KMGOV001", title="Knowledge Governance Policy, Belgium", doc_type="policy", source_system="SharePoint",
+         country="BE", client=None, team="Knowledge Management", product=None, topics=["knowledge_governance"],
+         owner_id="eva", author_id="eva", created_at="2025-01-15", updated_at="2025-01-15", version="2.0",
+         supersedes_id=None, location="SharePoint › Knowledge Management › Policies › KMGOV001", url="https://sdworx.sharepoint.com/km/policies/KMGOV001.docx",
+         sections=[
+             ("Source hierarchy", ["When an FAQ or guide contradicts an official payroll procedure, the official procedure is leading.",
+                                   "Documents without an owner or date are never an official source."]),
+             ("Who decides", ["When two sources conflict, the owner of the official procedure decides which information is correct.",
+                              "The owner of the conflicting document must update it within 10 working days."]),
+             ("Review rules", ["When a document owner leaves the company, ownership moves to their team lead.",
+                               "Old versions must be archived when a new version is published."]),
+             ("Missing knowledge", ["If no document exists for a question, employees contact the relevant country expert, who captures the answer in a new document."]),
+         ]),
+    dict(id="TEAMS-BE-CONSULTANTS", title="Teams chat, Payroll Consultants Belgium", doc_type="chat", source_system="Teams",
+         country="BE", client=None, team="Payroll", product=None, topics=["payroll_cutoff"],
+         owner_id=None, author_id="lotte", created_at="2026-09-10", updated_at="2026-09-10", version=None,
+         supersedes_id=None, location="Teams › Payroll Consultants Belgium › 10 Sep 2026 09:14–09:31", url="https://teams.microsoft.com/l/message/payroll-consultants-be/m-102",
+         sections=[
+             ("Pieter Wouters, 10 Sep 2026 09:14", ["Pieter: A client told me Client Service said they can send payroll changes 2 days before payday. Is that still correct?"]),
+             ("Lotte Vermeulen, 10 Sep 2026 09:31", ["Lotte: No, that FAQ is wrong. The official Belgian rule is still 5 working days before payday, and correction runs are not free. I will ask Client Service to fix their FAQ."]),
+         ]),
+    dict(id="TEAMS-FR-CONSULTANTS", title="Teams chat, Payroll Consultants France", doc_type="chat", source_system="Teams",
+         country="FR", client=None, team="Payroll", product=None, topics=["payroll_cutoff"],
+         owner_id=None, author_id="julien", created_at="2026-09-18", updated_at="2026-09-18", version=None,
+         supersedes_id=None, location="Teams › Payroll Consultants France › 18 Sep 2026 14:02–14:20", url="https://teams.microsoft.com/l/message/payroll-consultants-fr/m-202",
+         sections=[
+             ("Nadia Bouzid, 18 Sep 2026 14:02", ["Nadia: Does anyone know the deadline for payroll changes for our French clients? I can't find a document."]),
+             ("Julien Moreau, 18 Sep 2026 14:20", ["Julien: For French payrolls, payroll changes must reach us 6 working days before payday. We don't have a written procedure yet, it's on my to do list."]),
+         ]),
+]
+
+EDGES += [
+    ("lotte", "answered", "topic:payroll_cutoff", "2026-09-10", "corrected the Client Service FAQ deadline in Teams"),
+    ("lotte", "consulted", "topic:knowledge_governance", "2026-09-10", "decided the Client Service FAQ conflict as procedure owner"),
+    ("pieterw", "authored", "doc:TEAMS-BE-CONSULTANTS", "2026-09-10", None),
+    ("nadiab", "authored", "doc:TEAMS-FR-CONSULTANTS", "2026-09-18", None),
+    ("julien", "answered", "topic:payroll_cutoff", "2026-09-18", "answered the French payroll deadline question in Teams; no written procedure exists yet"),
+    ("eva", "answered", "topic:knowledge_governance", "2026-06-02", "#knowledge-management"),
+    ("sanne", "answered", "topic:payroll_cutoff", "2026-08-25", "#payroll-nl"),
+]
+
+# =====================================================================================================================
+# Team dataset 2 (branch demo-dataset-2, SDWorx_Simple_Trust_Demo): 1/5 parental leave at client Northstar Logistics.
+# =====================================================================================================================
+PEOPLE += [
+    dict(id="sophie", name="Sophie Lambert", role="Payroll Operations", team="Payroll BE", country="BE", seniority_years=10, email="sophie.lambert@sdworx.com", active=True),
+    dict(id="marcds", name="Marc De Smet", role="Payroll Operations (left company)", team="Payroll BE", country="BE", seniority_years=5, email=None, active=False),
+    dict(id="julienm", name="Julien Martens", role="Client payroll configuration, Northstar Logistics Belgium", team="Client Configuration BE", country="BE", seniority_years=6, email="julien.martens@sdworx.com", active=True),
+    dict(id="evavd", name="Eva van Dijk", role="Netherlands Payroll", team="Payroll NL", country="NL", seniority_years=7, email="eva.vandijk@sdworx.com", active=True),
+    dict(id="thomas", name="Thomas Vermeulen", role="Client Service", team="Client Service BE", country="BE", seniority_years=2, email="thomas.vermeulen@sdworx.com", active=True),
+    dict(id="lina", name="Lina Jacobs", role="Client Service", team="Client Service BE", country="BE", seniority_years=3, email="lina.jacobs@sdworx.com", active=True),
+    dict(id="amelie", name="Amélie Dubois", role="Belgian Benefits Specialist", team="Benefits BE", country="BE", seniority_years=8, email="amelie.dubois@sdworx.com", active=True),
+    dict(id="km", name="Knowledge Management", role="Team (shared ownership)", team="Knowledge Management", country="BE", seniority_years=0, email="knowledge@sdworx.com", active=True),
+]
+
+DOCS += [
+    dict(id="BE-PL-001-v3", title="Belgium — 1/5 Parental Leave Payroll Guide (v3)", doc_type="manual", source_system="SharePoint",
+         country="BE", client="Northstar", team="Payroll", product=None, topics=["parental_leave", "public_parental_allowance"],
+         owner_id="sophie", author_id="sophie", created_at="2024-03-01", updated_at="2026-08-12", version="3.0",
+         supersedes_id="BE-PL-001-v1", location="SharePoint › Payroll BE › Guides › BE-PL-001", url="https://sdworx.sharepoint.com/pay-be/guides/BE-PL-001-v3.docx",
+         sections=[
+             ("Purpose", ["Guidance for Belgian payroll colleagues handling employees who start 1/5 parental leave."]),
+             ("Current rule", ["For the Northstar Logistics Belgium account, an employee on approved 1/5 parental leave works 80% of the normal schedule.",
+                               "Employer-paid contractual salary is therefore calculated on an 80% basis for the covered period."]),
+             ("Important — old text still present", ["An older paragraph was accidentally retained during migration: Employees on 1/5 parental leave continue to receive 100% contractual salary from the employer.",
+                                                     "This statement belongs to the previous process and conflicts with the current rule above.",
+                                                     "It must be removed at the next document review."]),
+             ("Public allowance", ["The employer payroll instruction does not determine the amount of any separate public parental-leave allowance."]),
+             ("Contact", ["Questions about Belgian payroll treatment: Sophie Lambert, Payroll Operations."]),
+         ]),
+    dict(id="BE-PL-001-v1", title="Belgium — Parental Leave Procedure (Legacy)", doc_type="procedure", source_system="SharePoint",
+         country="BE", client=None, team="Payroll", product=None, topics=["parental_leave"],
+         owner_id="marcds", author_id="marcds", created_at="2022-02-18", updated_at="2022-02-18", version="1.0",
+         supersedes_id=None, location="SharePoint › Payroll BE › Procedures › BE-PL-001 (status Active, not archived by mistake)", url="https://sdworx.sharepoint.com/pay-be/procedures/BE-PL-001-v1.docx",
+         sections=[
+             ("Rule", ["For 1/5 parental leave, keep contractual salary at 100% and record the leave separately."]),
+             ("Note", ["This procedure predates the current Northstar Belgium payroll setup.", "The original owner is no longer employed."]),
+             ("Contact", ["No current owner is recorded."]),
+         ]),
+    dict(id="NSB-PAY-07", title="Northstar Logistics Belgium — Payroll Note", doc_type="analysis", source_system="SharePoint",
+         country="BE", client="Northstar", team="Client Configuration", product=None, topics=["parental_leave"],
+         owner_id="julienm", author_id="julienm", created_at="2026-08-20", updated_at="2026-08-20", version=None,
+         supersedes_id=None, location="SharePoint › Clients › Northstar Logistics › NSB-PAY-07.pdf", url="https://sdworx.sharepoint.com/clients/northstar/NSB-PAY-07.pdf",
+         sections=[
+             ("Current configuration", ["For Northstar Logistics Belgium, approved 1/5 parental leave uses an 80% employer-paid contractual salary basis during the leave period."]),
+             ("Scope", ["Belgium only.", "Do not apply this note to another country."]),
+         ]),
+    dict(id="NL-PL-004", title="Netherlands — Parental Leave Payroll", doc_type="manual", source_system="SharePoint",
+         country="NL", client=None, team="Payroll", product=None, topics=["parental_leave"],
+         owner_id="evavd", author_id="evavd", created_at="2025-01-10", updated_at="2026-09-05", version="2.0",
+         supersedes_id=None, location="SharePoint › Payroll NL › Guides › NL-PL-004", url="https://sdworx.sharepoint.com/pay-nl/guides/NL-PL-004.docx",
+         sections=[
+             ("Rule", ["For the Dutch payroll scenario, a different calculation applies during parental leave.", "This document must not be used for Belgian employees."]),
+             ("Contact", ["Eva van Dijk, Netherlands Payroll."]),
+         ]),
+    dict(id="EMAIL-THOMAS-2026-09-24", title="Email: 1/5 parental leave salary (Northstar)", doc_type="email", source_system="Outlook",
+         country="BE", client="Northstar", team="Client Service", product=None, topics=["parental_leave"],
+         owner_id="thomas", author_id="thomas", created_at="2026-09-24", updated_at="2026-09-24", version=None,
+         supersedes_id=None, location="Outlook › To: Northstar Client Service Team › 24 Sep 2026 09:14", url="https://outlook.office.com/mail/id/AAMkAGVm-thomas-20260924",
+         sections=[
+             ("Message", ["I believe employees at Northstar Belgium should still receive 100% contractual salary during 1/5 parental leave.",
+                          "I used an old onboarding note for this, so I have not checked whether Payroll Operations changed the setup."]),
+         ]),
+    dict(id="TEAMS-NORTHSTAR-PAYROLL", title="Teams chat, #northstar-payroll", doc_type="chat", source_system="Teams",
+         country="BE", client="Northstar", team="Payroll", product=None, topics=["parental_leave"],
+         owner_id=None, author_id="sophie", created_at="2026-09-24", updated_at="2026-09-24", version=None,
+         supersedes_id=None, location="Teams › #northstar-payroll › 24 Sep 2026 10:08–10:12", url="https://teams.microsoft.com/l/message/northstar-payroll/1",
+         sections=[
+             ("Sophie Lambert, Payroll Operations, 24 Sep 2026 10:08", ["Sophie: For Northstar Belgium, please use the current BE-PL-001 v3 guidance. The payroll basis is 80% during approved 1/5 parental leave."]),
+             ("Lina Jacobs, Client Service, 24 Sep 2026 10:10", ["Lina: The old file and Thomas's email say 100%."]),
+             ("Sophie Lambert, 24 Sep 2026 10:12", ["Sophie: Those are based on the previous process. The old document should have been archived."]),
+         ]),
+    dict(id="BE-DIR-001", title="Belgium Payroll — Who to Ask (expertise directory)", doc_type="wiki", source_system="SharePoint",
+         country="BE", client=None, team="Knowledge Management", product=None, topics=["parental_leave", "public_parental_allowance"],
+         owner_id="km", author_id="km", created_at="2026-09-25", updated_at="2026-09-25", version="1.0",
+         supersedes_id=None, location="SharePoint › Knowledge Management › Directories › BE-DIR-001", url="https://sdworx.sharepoint.com/km/directories/BE-DIR-001.docx",
+         sections=[
+             ("Sophie Lambert", ["Belgian payroll operations; parental leave payroll treatment; Northstar Logistics."]),
+             ("Amélie Dubois", ["Belgian benefits specialist; public parental-leave allowances and government benefit questions."]),
+             ("Julien Martens", ["Client payroll configuration; Northstar Logistics Belgium."]),
+             ("Purpose", ["Use this directory to identify the right colleague when the knowledge base does not contain enough verified information to answer a question."]),
+         ]),
+]
+
+EDGES += [
+    # expertise directory BE-DIR-001 → 'listed' edges per topic
+    ("sophie", "listed", "topic:parental_leave", "2026-09-25", "Belgian payroll operations; parental leave payroll treatment; Northstar Logistics"),
+    ("amelie", "listed", "topic:public_parental_allowance", "2026-09-25", "Belgian benefits specialist; public parental-leave allowances and government benefit questions"),
+    ("julienm", "listed", "topic:parental_leave", "2026-09-25", "Client payroll configuration; Northstar Logistics Belgium"),
+    ("sophie", "answered", "topic:parental_leave", "2026-09-24", "#northstar-payroll: confirmed the 80% basis"),
+    ("lina", "authored", "doc:TEAMS-NORTHSTAR-PAYROLL", "2026-09-24", None),
+    ("amelie", "answered", "topic:public_parental_allowance", "2026-07-08", "#benefits-be"),
+]

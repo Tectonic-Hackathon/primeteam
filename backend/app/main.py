@@ -31,6 +31,7 @@ class ReviewAction(BaseModel):
     question: str | None = None
     actor_id: str | None = None
     note: str | None = None
+    assignee_id: str | None = None   # override for documents without an owner
 
 
 class Knowledge(BaseModel):
@@ -45,13 +46,20 @@ class Knowledge(BaseModel):
 
 
 SUGGESTIONS = [
-    "What is the notice period for a white-collar employee with 5 years of service in Belgium?",
+    "Should Laura's employer-paid contractual salary be calculated at 80% or 100% during the 1/5 parental-leave period?",
+    "How much public parental-leave allowance will Laura personally receive?",
+    "What is the deadline for submitting payroll changes for a Belgian client?",
+    "What is the payroll change deadline for French clients?",
+    "Are there multiple versions of the Belgian payroll cutoff procedure?",
+    "Who can I ask about the Belgian payroll cutoff rule?",
+    "The FAQ and the procedure disagree, who decides?",
+    "What is the payroll change deadline for Dutch payrolls?",
+    "What is the payroll change deadline in Germany?",
     "How many days of guaranteed salary does a white-collar employee get during sick leave in Belgium?",
-    "How many statutory vacation days does a full-time employee get in the Netherlands?",
+    "What is the notice period for a white-collar employee with 5 years of service in Belgium?",
     "How do I change the meal voucher face value for Colruyt in eBlox, and which provider issues their vouchers after the switch?",
     "What did we decide about holiday pay for Delhaize?",
     "How is the 13th month paid out for Siemens?",
-    "What is the notice period for a blue-collar employee in France?",
 ]
 
 
@@ -139,7 +147,12 @@ def review_action(body: ReviewAction):
         cur.execute("UPDATE documents SET status = %s WHERE id = %s", (status, body.document_id))
         task = None
         if body.action == "request_update":
-            assignee = d["owner_id"] or d["author_id"]
+            assignee = body.assignee_id or d["owner_id"] or d["author_id"]
+            if not assignee:
+                raise HTTPException(400, "document has no owner or author; pass assignee_id")
+            cur.execute("SELECT name, email FROM people WHERE id = %s", (assignee,))
+            a = cur.fetchone() or {}
+            d["owner_name"], d["owner_email"] = a.get("name") or d["owner_name"], a.get("email") or d["owner_email"]
             cur.execute("INSERT INTO tasks (kind, document_id, assignee_id, requested_by, question, note) VALUES ('request_update', %s, %s, %s, %s, %s) RETURNING id",
                         (body.document_id, assignee, body.actor_id, body.question, body.note))
             task = {"id": cur.fetchone()["id"], "assignee": d["owner_name"] or d["author_name"], "email": d["owner_email"] or d["author_email"]}

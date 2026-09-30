@@ -2,6 +2,7 @@
 import re
 from ..embeddings import embed
 from ..taxonomy import STOPWORDS, INTENT_DOC_TYPES
+from .conflicts import keyfacts
 
 _TOKEN = re.compile(r"[a-z0-9€£%]+")
 
@@ -12,7 +13,7 @@ SELECT c.id AS chunk_id, c.document_id, c.section, c.line_start, c.line_end, c.t
        1 - (c.embedding <=> q.v) AS sim,
        ts_rank_cd(c.tsv, q.tq) AS fts,
        d.title, d.doc_type, d.source_system, d.country, d.client, d.team, d.product, d.topics AS doc_topics,
-       d.owner_id, d.author_id, d.created_at, d.updated_at, d.version, d.supersedes_id, d.location, d.url, d.status, d.validated_at
+       d.owner_id, d.author_id, d.created_at, d.updated_at, d.version, d.supersedes_id, d.location, d.url, d.status, d.validated_at, d.date_known
 FROM chunks c JOIN documents d ON d.id = c.document_id, q
 WHERE d.status IN ('active', 'needs_update') AND (c.tsv @@ q.tq OR c.id IN (SELECT id FROM vec))
 """
@@ -52,8 +53,12 @@ def retrieve(conn, sub: dict, ctx: dict, k: int = 15) -> list[dict]:
             if cur_best is None or r["sim"] > cur_best["sim"]:
                 pool[r["chunk_id"]] = dict(r)
     out = []
+    qkeys = {k.split("=")[0] for k in keyfacts(sub["text"])}
     for cid, row in pool.items():
         lex = _lexical(sub["text"], row)
+        # the question asks about a specific fact (e.g. whether a correction run is free): passages stating that fact rank up
+        if qkeys and qkeys & {k.split("=")[0] for k in keyfacts(row["text"])}:
+            lex = min(1.0, lex + 0.4)
         topic_hit = bool(set(sub["topics"]) & set(row["chunk_topics"] or []))
         sim = max(0.0, float(row["sim"]))
         # nomic cosine for related text tends to sit around 0.6-0.85; rescale to 0..1
@@ -67,6 +72,8 @@ def retrieve(conn, sub: dict, ctx: dict, k: int = 15) -> list[dict]:
             relevance += 0.15
         if intent == "procedure" and ("step" in row["section"].lower() or row["doc_type"] == "procedure"):
             relevance += 0.05
+        if intent == "contact" and (re.search(r"contact|who", row["section"].lower()) or re.search(r"\bgo to\b|\bcontact\b|questions about", row["text"].lower())):
+            relevance += 0.2
         relevance = min(1.0, relevance)
         row.update({"lexical": round(lex, 3), "topic_hit": topic_hit, "relevance": round(relevance, 3), "rrf": rrf.get(cid, 0)})
         out.append(row)

@@ -65,6 +65,7 @@ CREATE INDEX IF NOT EXISTS edges_dst_idx ON edges (dst);
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';  -- active, archived, retracted, needs_update
 
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS content_hash TEXT;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS date_known BOOLEAN NOT NULL DEFAULT TRUE;  -- FALSE: no date on the source at all
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS validated_at DATE;       -- owner confirmed "still valid" without editing
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMP;  -- last time a sync saw it in the source
 ALTER TABLE chunks ADD COLUMN IF NOT EXISTS content_hash TEXT;

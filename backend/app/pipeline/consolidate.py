@@ -4,6 +4,7 @@ Deterministic by design for the first iteration: every sentence in the answer is
 evidence passage, so grounding is guaranteed. An LLM writer can be swapped in behind the same interface."""
 import re
 from ..taxonomy import COUNTRY_NAMES, STOPWORDS
+from .conflicts import asserts
 
 _SENT = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 _TOK = re.compile(r"[a-z0-9€£%]+")
@@ -36,11 +37,11 @@ def pick_primary(strong: list[dict]) -> dict:
     channel (policy, procedure, manual, meeting decision...). Informal sources only win when nothing formal exists."""
     top_rel = strong[0]["relevance"]
     qualified = [c for c in strong
-                 if c["relevance"] >= top_rel - 0.2
+                 if c["relevance"] >= max(0.5, top_rel - 0.35)
                  and c["trust"]["signals"]["owner"]["value"] >= 1.0
                  and c["trust"]["signals"]["channel"]["value"] >= FORMAL_CHANNEL]
     if qualified:
-        qualified.sort(key=lambda c: (c["updated_at"], c["trust"]["total"], c["relevance"]), reverse=True)
+        qualified.sort(key=lambda c: (c["doc_type"] in ("policy", "procedure", "manual"), c["updated_at"], c["trust"]["total"], c["relevance"]), reverse=True)
         return qualified[0]
     return strong[0]
 
@@ -74,6 +75,7 @@ def _evidence_card(c: dict, eid: str, people: dict) -> dict:
         "trust": c["trust"],
         "status": c.get("status", "active"),
         "validated_at": c["validated_at"].isoformat() if c.get("validated_at") else None,
+        "date_known": c.get("date_known", True),
         "stale": c["trust"].get("stale", False),
         "owner_id": c["owner_id"],
         "author_id": c["author_id"],
@@ -85,7 +87,7 @@ def _evidence_card(c: dict, eid: str, people: dict) -> dict:
 def consolidate(question: str, ctx: dict, subs: list[dict], per_sub: list[dict], experts_for_gaps, people: dict) -> dict:
     evidence: list[dict] = []
     ev_index: dict[int, str] = {}
-    review = {"conflicts": [], "duplicates": [], "outdated": [], "out_of_scope": [], "stale": []}
+    review = {"conflicts": [], "duplicates": [], "outdated": [], "out_of_scope": [], "stale": [], "unofficial": [], "undocumented": []}
 
     def cite(c: dict) -> str:
         if c["chunk_id"] in ev_index:
@@ -100,7 +102,11 @@ def consolidate(question: str, ctx: dict, subs: list[dict], per_sub: list[dict],
     for sub, res in zip(subs, per_sub):
         usable = res["usable"]
         on_topic = [c for c in usable if not sub["topics"] or set(sub["topics"]) & set(c["chunk_topics"] or [])]
+        on_topic = [c for c in on_topic if asserts(c["text"])]  # a question in a chat is never an answer
         strong = [c for c in on_topic if c["relevance"] >= RELEVANCE_MIN and c["trust"]["total"] >= TRUST_MIN]
+        # documents that explicitly say they do not determine this take precedence when they are about as relevant
+        if res.get("disclaimers") and (not strong or res["disclaimers"][0]["relevance"] >= strong[0]["relevance"] - 0.05):
+            strong = []
         related = [c for c in on_topic if RELATED_MIN <= c["relevance"] < RELEVANCE_MIN or (c["relevance"] >= RELEVANCE_MIN and c["trust"]["total"] < TRUST_MIN)]
         segments = []
         note = None
@@ -125,29 +131,36 @@ def consolidate(question: str, ctx: dict, subs: list[dict], per_sub: list[dict],
                 conf -= 0.15
                 status = "contested"
                 note = "Another source states a different value. The preferred source is shown; see the review tab."
-                experts = experts_for_gaps(sub["topics"], ctx.get("country"))
+                experts = experts_for_gaps(sub["topics"][:1] or sub["topics"], ctx.get("country"))
             elif primary["doc_type"] in INFORMAL:
                 status = "informal"
                 conf -= 0.1
                 note = f"The best evidence is a {primary['doc_type']}, not an owned document. Confirm with the people below."
-                experts = experts_for_gaps(sub["topics"], ctx.get("country"))
+                experts = experts_for_gaps(sub["topics"][:1] or sub["topics"], ctx.get("country"))
             confidences.append(max(0.0, conf))
-        elif related:
+        elif related and not res.get("disclaimers"):
             primary = related[0]
             segments.append({"text": primary["text"], "evidence": [cite(primary)], "kind": "weak"})
             confidences.append(0.3 * primary["trust"]["total"])
             status = "partial"
             note = "Related material was found but nothing that answers this directly."
-            experts = experts_for_gaps(sub["topics"], ctx.get("country"))
+            experts = experts_for_gaps(sub["topics"][:1] or sub["topics"], ctx.get("country"))
+        elif res.get("disclaimers"):
+            d = res["disclaimers"][0]
+            segments.append({"text": d["text"], "evidence": [cite(d)], "kind": "disclaimer"})
+            status = "missing"
+            note = "The available documents state explicitly that they do not determine this. Nothing is claimed."
+            confidences.append(0.0)
+            experts = experts_for_gaps(sub["topics"][:1] or sub["topics"], ctx.get("country"))
         else:
             status = "missing"
             note = "No grounded evidence in the knowledge base. The people below are the most likely to know."
             confidences.append(0.0)
-            experts = experts_for_gaps(sub["topics"], ctx.get("country"))
+            experts = experts_for_gaps(sub["topics"][:1] or sub["topics"], ctx.get("country"))
 
         for item in res["review"]["conflicts"]:
             review["conflicts"].append({
-                "question": sub["text"],
+                "question": sub["text"], "same_document": item.get("same_document", False),
                 "kept": _evidence_card(item["winner"], cite(item["winner"]), people),
                 "rejected": _evidence_card(item["loser"], f"R{len(review['conflicts']) + 1}", people),
                 "kept_facts": item["winner_facts"], "rejected_facts": item["loser_facts"],
@@ -166,7 +179,26 @@ def consolidate(question: str, ctx: dict, subs: list[dict], per_sub: list[dict],
         for c in strong[:3] if strong else []:
             if c["trust"].get("stale") and c["document_id"] not in {x["item"]["document_id"] for x in review["stale"]}:
                 review["stale"].append({"question": sub["text"], "item": _evidence_card(c, cite(c), people)})
+        for item in res["review"]["unofficial"]:
+            c = item["item"]
+            if c["document_id"] in {x["item"]["document_id"] for x in review["unofficial"]}:
+                continue
+            entry = {"question": sub["text"], "item": _evidence_card(c, f"U{len(review['unofficial']) + 1}", people)}
+            if item.get("resembles"):
+                entry["resembles"] = _evidence_card(item["resembles"], cite(item["resembles"]), people)
+                entry["diffs"] = item.get("diffs", [])
+            review["unofficial"].append(entry)
+        if status == "informal" and segments:
+            prim = strong[0] if strong else None
+            if prim is None:
+                prim = next((c for c in usable if c["chunk_id"] == segments[0].get("chunk_id")), None)
+            card = next((e for e in evidence if e["id"] == segments[0]["evidence"][0]), None)
+            if card:
+                review["undocumented"].append({"question": sub["text"], "item": card, "topics": sub["topics"]})
 
+        if re.search(r"\bversions?\b", sub["text"], re.I) and res["review"]["outdated"]:
+            olds = ", ".join(f"{c['title']} ({c['updated_at'].isoformat()[:4]})" for c in res["review"]["outdated"])
+            note = (note + " " if note else "") + f"Yes: {len(res['review']['outdated'])} older version(s) still exist and are excluded from answers: {olds}."
         sections.append({
             "id": sub["id"], "question": sub["text"], "status": status,
             "topics": sub["topics"], "rewrites": sub["rewrites"],
@@ -196,6 +228,7 @@ def consolidate(question: str, ctx: dict, subs: list[dict], per_sub: list[dict],
         "verdict": verdict,
         "status": c.get("status", "active"),
         "validated_at": c["validated_at"].isoformat() if c.get("validated_at") else None,
+        "date_known": c.get("date_known", True),
         "stale": c["trust"].get("stale", False),
         "owner_id": c["owner_id"],
         "author_id": c["author_id"],
