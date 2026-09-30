@@ -1,0 +1,8 @@
+{
+  "channel": "Payroll Consultants Belgium",
+  "note": "Fictional test data for the Tectonic Hackathon. Chat export, not an official document.",
+  "messages": [
+    {"id": "m-101", "timestamp": "2026-09-10 09:14", "author": "Pieter Wouters", "text": "Pieter: A client told me Client Service said they can send payroll changes 2 days before payday. Is that still correct?"},
+    {"id": "m-102", "timestamp": "2026-09-10 09:31", "author": "Lotte Vermeulen", "text": "Lotte: No, that FAQ is wrong. The official Belgian rule is still 5 working days before payday, and correction runs are not free. I will ask Client Service to fix their FAQ."}
+  ]
+}

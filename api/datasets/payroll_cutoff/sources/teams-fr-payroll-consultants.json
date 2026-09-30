@@ -1,0 +1,8 @@
+{
+  "channel": "Payroll Consultants France",
+  "note": "Fictional test data for the Tectonic Hackathon. Chat export, not an official document.",
+  "messages": [
+    {"id": "m-201", "timestamp": "2026-09-18 14:02", "author": "Nadia Bouzid", "text": "Nadia: Does anyone know the deadline for payroll changes for our French clients? I can't find a document."},
+    {"id": "m-202", "timestamp": "2026-09-18 14:20", "author": "Julien Moreau", "text": "Julien: For French payrolls, payroll changes must reach us 6 working days before payday. We don't have a written procedure yet, it's on my to do list."}
+  ]
+}

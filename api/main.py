@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field, field_validator
 
-from db import connect, init_db, import_source, rebuild_index
+from db import DATASETS, connect, init_db, import_source, rebuild_index
 from engine import answer, review_items, serialize_source, visible
 
 MAX_UPLOAD = 2 * 1024 * 1024
@@ -71,6 +71,14 @@ def health():
                 "vector_index": "local concept-hash vectors", "lexical_index": "SQLite FTS5",
                 "sources": count, "spans": spans, "vectors": vectors,
                 "llm_provider": "unavailable; deterministic evidence mode active"}
+
+
+@app.get("/api/demo-questions")
+def demo_questions():
+    """Synthetic example questions for the payroll cutoff dataset, shown as example buttons in the UI."""
+    data = json.loads((DATASETS / "payroll_cutoff" / "demo_questions.json").read_text(encoding="utf-8"))
+    keys = ("id", "label", "area", "question", "country", "domain", "client", "project", "as_of", "talking_point")
+    return {"questions": [{k: q[k] for k in keys} for q in data["questions"]]}
 
 
 @app.get("/api/sources")

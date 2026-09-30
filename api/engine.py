@@ -29,10 +29,13 @@ def serialize_source(row: sqlite3.Row | dict) -> dict:
 def plan(question: str, country: str, domain: str) -> dict:
     q = question.strip()
     words = set(tokens(q))
-    topic = "handover" if {"handover", "transfer", "checklist", "handoff"} & words else "general"
+    topic = ("handover" if {"handover", "transfer", "checklist", "handoff"} & words else
+             "cutoff" if {"cutoff", "deadline", "payday", "correction"} & words else "general")
     reformulations = [q]
     if topic == "handover":
         reformulations += ["payroll handover procedure checklist", "transfer acknowledgement", "handover meeting ticket exception"]
+    elif topic == "cutoff":
+        reformulations += ["payroll changes cutoff deadline working days before payday", "late changes correction run", "cutoff exceptions procedure owner"]
     else:
         reformulations += [" ".join(w for w in re.findall(r"[a-z0-9]+", q.lower()) if w not in STOP)[:180]]
     return {"topic": topic, "reformulations": list(dict.fromkeys(reformulations))[:4],
@@ -116,7 +119,12 @@ def retrieve(db: sqlite3.Connection, question: str, role: str, context: dict, qu
         if len(selected) == 40:
             break
     excluded_by_source = {x["source_id"]: x for x in excluded}
+    # Sources retrieved for this question that apply to its context (old versions count, other scopes do not).
+    lifecycle = ("Superseded", "Expired", "Not effective")
+    relevant = {c["source_id"] for c in candidates}
+    relevant |= {x["source_id"] for x in excluded if x["reasons"] and all(r.startswith(lifecycle) for r in x["reasons"])}
     diagnostics = {"candidate_ids": [x["span_id"] for x in selected], "fts_matches": len(fts_ids),
+                   "relevant_sources": sorted(relevant),
                    "excluded": sorted(excluded_by_source.values(), key=lambda x: x["score"], reverse=True)[:20],
                    "scores": {x["span_id"]: x["score"] for x in selected}}
     return selected, diagnostics
@@ -129,11 +137,26 @@ def validate_claim(candidate: dict, context: dict) -> bool:
             candidate["text"].strip() != "" and source["type"] in {"procedure", "policy", "manual", "checklist"})
 
 
-def expert_suggestions(db: sqlite3.Connection, role: str, topic: str, country: str) -> list[dict]:
-    rows = db.execute("SELECT p.*,a.id activity_id,a.kind,a.source_id,a.span_id,a.happened_at,a.explanation,s.acl,s.country source_country FROM expert_activity a JOIN people p ON p.id=a.person_id JOIN sources s ON s.id=a.source_id WHERE a.topic=? ORDER BY a.happened_at DESC", (topic,)).fetchall()
+def cutoff_components(question: str) -> list[str]:
+    """Parts of a payroll cutoff question that each need their own approved evidence."""
+    q = question.lower()
+    parts = []
+    if re.search(r"correction", q): parts.append("correction run")
+    if re.search(r"exception|urgent|termination", q): parts.append("exceptions")
+    if re.search(r"\bwho\b|contact|\bask\b", q): parts.append("contact person")
+    if re.search(r"deadline|payday|\bwhen\b|working days", q) or not parts:
+        parts.insert(0, "payroll change deadline")
+    return parts
+
+
+def expert_suggestions(db: sqlite3.Connection, role: str, topic: str, country: str, relevant: set[str] | None = None) -> list[dict]:
+    rows = db.execute("SELECT p.*,a.id activity_id,a.kind,a.source_id,a.span_id,a.happened_at,a.explanation,s.acl,s.country source_country FROM expert_activity a JOIN people p ON p.id=a.person_id JOIN sources s ON s.id=a.source_id WHERE a.topic=? OR ?='general' ORDER BY a.happened_at DESC", (topic, topic)).fetchall()
     by_person: dict[str, dict] = {}
     for row in rows:
         if not visible(row, role) or row["country"] != country or row["source_country"] != country:
+            continue
+        # General questions have no topic of their own, so only activity on sources retrieved for them counts.
+        if topic == "general" and relevant is not None and row["source_id"] not in relevant:
             continue
         expert = by_person.setdefault(row["id"], {"id": row["id"], "name": row["name"], "role": row["role"],
                                                    "team": row["team"], "country": row["country"],
@@ -146,13 +169,17 @@ def expert_suggestions(db: sqlite3.Connection, role: str, topic: str, country: s
     return result[:3]
 
 
-def review_items(db: sqlite3.Connection, role: str, context: dict | None = None, missing: list[str] | None = None) -> list[dict]:
+def review_items(db: sqlite3.Connection, role: str, context: dict | None = None, missing: list[str] | None = None,
+                 relevant: set[str] | None = None) -> list[dict]:
+    """Review items; when `relevant` is given, only items touching sources retrieved for this question."""
     items = []
     relations = db.execute("SELECT r.*,a.title a_title,a.acl a_acl,a.country a_country,b.title b_title,b.acl b_acl,b.country b_country FROM relations r JOIN sources a ON a.id=r.from_source JOIN sources b ON b.id=r.to_source").fetchall()
     for row in relations:
         if row["kind"] == "supersedes" or not (visible({"acl": row["a_acl"]}, role) and visible({"acl": row["b_acl"]}, role)):
             continue
         if context and row["a_country"] != context["country"]:
+            continue
+        if relevant is not None and not {row["from_source"], row["to_source"]} & relevant:
             continue
         label = "Conflict" if row["kind"] == "conflicts" else "Exact duplicate" if row["kind"] == "exact_duplicate" else "Near duplicate"
         items.append({"id": f"relation-{row['id']}", "kind": row["kind"], "label": label,
@@ -161,6 +188,8 @@ def review_items(db: sqlite3.Connection, role: str, context: dict | None = None,
     sources = db.execute("SELECT * FROM sources").fetchall()
     for s in sources:
         if not visible(s, role) or (context and s["country"] != context["country"]):
+            continue
+        if relevant is not None and s["id"] not in relevant:
             continue
         if s["status"] == "superseded":
             items.append({"id": f"old-{s['id']}", "kind": "outdated", "label": "Outdated version",
@@ -189,10 +218,12 @@ def answer(db: sqlite3.Connection, payload: dict, role: str) -> dict:
     query_plan = plan(question, context["country"], context["domain"])
     candidates, diagnostics = retrieve(db, question, role, context, query_plan)
     topic = query_plan["topic"]
-    requested = ["checklist", "acknowledgement"] if topic == "handover" else []
+    requested = ["checklist", "acknowledgement"] if topic == "handover" else cutoff_components(question) if topic == "cutoff" else []
     if re.search(r"client.facing|completion note|who confirms|final confirmation", question, re.I):
         requested.append("client-facing completion note")
     approved = [c for c in candidates if validate_claim(c, context) and (topic == "general" or c["topic"] == topic)]
+    if topic == "cutoff":  # show the parts the question asks about first
+        approved.sort(key=lambda c: c["component"] not in requested)
     # The answer is a short selection of verbatim source sentences, never free-form generated claims.
     selected = []
     seen_component = set()
@@ -220,7 +251,15 @@ def answer(db: sqlite3.Connection, payload: dict, role: str) -> dict:
     conflict_source_ids = {row["from_source"] for row in db.execute("SELECT from_source FROM relations WHERE kind='conflicts'").fetchall()}
     conflict_components = {c["component"] for c in candidates if c["source_id"] in conflict_source_ids}
     for component in requested:
-        if component in found:
+        if topic == "cutoff" and component in found:
+            chosen = next(c for c in selected if c["component"] == component)
+            # Applicable sources (approved or not) that state a different value for the same part of the answer.
+            others = {c["source"]["title"] for c in candidates if c["component"] == component
+                      and c["source_id"] != chosen["source_id"] and c["claim_value"] and c["claim_value"] != chosen["claim_value"]}
+            status = "conflicted" if others else "supported"
+            explanation = (f"Approved evidence exists, but other sources state a different value: {'; '.join(sorted(others))}." if others
+                           else "Supported by an approved applicable source.")
+        elif component in found:
             status = "conflicted" if component in conflict_components and context["country"] == "Belgium" else "supported"
             explanation = "Approved evidence exists, but an unapproved source proposes a different step." if status == "conflicted" else "Supported by an approved applicable source."
         else:
@@ -228,7 +267,7 @@ def answer(db: sqlite3.Connection, payload: dict, role: str) -> dict:
             missing.append(component)
             explanation = "No approved, applicable source establishes this component."
         completeness.append({"component": component, "status": status, "reason": explanation})
-    reviews = review_items(db, role, context, missing)
+    reviews = review_items(db, role, context, missing, set(diagnostics["relevant_sources"]))
     run_id = uuid.uuid4().hex[:12]
     db.execute("INSERT INTO query_runs VALUES (?,?,?,?,?,?,?)", (run_id, now(), role, question, json.dumps(context),
                json.dumps(query_plan), json.dumps(diagnostics)))
@@ -241,5 +280,5 @@ def answer(db: sqlite3.Connection, payload: dict, role: str) -> dict:
             "scope": context, "claims": claims, "evidence": evidence, "completeness": completeness,
             "unknown": [f"Who confirms the client-facing completion note is unknown from approved evidence." if x == "client-facing completion note" else f"{x.capitalize()} is unknown from approved evidence." for x in missing],
             "review_items": reviews, "exclusions": diagnostics["excluded"],
-            "experts": expert_suggestions(db, role, topic, context["country"]),
+            "experts": expert_suggestions(db, role, topic, context["country"], set(diagnostics["relevant_sources"])),
             "plan": query_plan, "diagnostics": diagnostics}

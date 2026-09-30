@@ -1,0 +1,114 @@
+{
+  "description": "Demo questions for the payroll cutoff dataset. The UI shows them as example buttons and tests/test_payroll_cutoff.py checks every 'expect' block against the engine.",
+  "questions": [
+    {
+      "id": "T1", "label": "Belgian deadline", "area": "Trust + Detect",
+      "question": "What is the deadline for submitting payroll changes for a Belgian client?",
+      "country": "Belgium", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "One answer from the approved procedure (5 days). The deadline is marked conflicted because the FAQ (2 days) and the quick guide (4 days) disagree. For review shows the conflict, the duplicate and the outdated v1.",
+      "expect": {
+        "status": "Needs review",
+        "first_claim_source": "be-cutoff-v3", "first_claim_contains": "5 working days",
+        "completeness": {"payroll change deadline": "conflicted"},
+        "review_kinds": ["conflicts", "near_duplicate", "outdated", "missing_metadata"],
+        "excluded_sources": ["be-cutoff-v1", "nl-cutoff"],
+        "experts": ["Lotte Vermeulen"]
+      }
+    },
+    {
+      "id": "T2", "label": "Trust the quick guide?", "area": "Trust",
+      "question": "Can I trust the payroll cutoff quick guide?",
+      "country": "Belgium", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "The quick guide is never used as evidence: no owner, no date, unknown approval. It is flagged as a near duplicate with a different number.",
+      "expect": {
+        "status": "Needs review",
+        "first_claim_source": "be-cutoff-v3",
+        "review_kinds": ["near_duplicate", "missing_metadata"],
+        "claims_never_from": ["be-cutoff-quick-guide"]
+      }
+    },
+    {
+      "id": "D1", "label": "Correction run free?", "area": "Detect",
+      "question": "Is a correction run free for Belgian clients?",
+      "country": "Belgium", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "The procedure says correction runs are charged. The FAQ says free, so the correction run part is marked conflicted.",
+      "expect": {
+        "status": "Needs review",
+        "first_claim_source": "be-cutoff-v3", "first_claim_contains": "charged separately",
+        "completeness": {"correction run": "conflicted"},
+        "review_kinds": ["conflicts"]
+      }
+    },
+    {
+      "id": "D2", "label": "Multiple versions?", "area": "Detect",
+      "question": "Are there multiple versions of the Belgian payroll cutoff procedure?",
+      "country": "Belgium", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "v1 (3 days, 2021) is excluded as superseded and expired and shows as an outdated version. Only v3 is used.",
+      "expect": {
+        "first_claim_source": "be-cutoff-v3",
+        "review_kinds": ["outdated", "near_duplicate"],
+        "excluded_sources": ["be-cutoff-v1"],
+        "claims_never_from": ["be-cutoff-v1"]
+      }
+    },
+    {
+      "id": "C1", "label": "Who can I ask?", "area": "Connect",
+      "question": "Who can I ask about the Belgian payroll cutoff rule?",
+      "country": "Belgium", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "Lotte Vermeulen, owner of the approved procedure, with her activity as proof. Marc Peeters from the old version is not suggested.",
+      "expect": {
+        "status": "Supported",
+        "first_claim_source": "be-cutoff-v3", "first_claim_contains": "Lotte Vermeulen",
+        "completeness": {"contact person": "supported"},
+        "experts": ["Lotte Vermeulen"], "experts_never": ["Marc Peeters"]
+      }
+    },
+    {
+      "id": "C2", "label": "Who decides?", "area": "Connect",
+      "question": "The FAQ and the procedure disagree, who decides?",
+      "country": "Belgium", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "The governance policy answers: the official procedure leads and its owner decides. Lotte and Eva are suggested.",
+      "expect": {
+        "status": "Supported",
+        "first_claim_source": "be-knowledge-governance", "first_claim_contains": "owner of the official procedure decides",
+        "experts": ["Lotte Vermeulen", "Eva Claes"], "experts_never": ["Maya Vermeer"]
+      }
+    },
+    {
+      "id": "K1", "label": "French deadline", "area": "Capture",
+      "question": "What is the payroll change deadline for French clients?",
+      "country": "France", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "No approved answer: the French deadline only lives in a Teams chat. The tool flags missing knowledge and suggests Julien Moreau to capture it.",
+      "expect": {
+        "status": "Needs review", "claims": 0,
+        "completeness": {"payroll change deadline": "missing"},
+        "review_kinds": ["missing_knowledge", "missing_metadata"],
+        "experts": ["Julien Moreau"]
+      }
+    },
+    {
+      "id": "N1", "label": "Dutch deadline", "area": "Scope",
+      "question": "What is the payroll change deadline for Dutch payrolls?",
+      "country": "Netherlands", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "7 days from the Dutch procedure. No Belgian source leaks into the answer.",
+      "expect": {
+        "status": "Supported",
+        "first_claim_source": "nl-cutoff", "first_claim_contains": "7 working days",
+        "completeness": {"payroll change deadline": "supported"},
+        "experts": ["Sanne de Vries"]
+      }
+    },
+    {
+      "id": "B1", "label": "German deadline", "area": "No answer",
+      "question": "What is the payroll change deadline in Germany?",
+      "country": "Germany", "domain": "Pay", "client": "", "project": "", "as_of": "2026-09-30",
+      "talking_point": "Nothing is known, so nothing is invented: no claims, no expert, a missing knowledge item.",
+      "expect": {
+        "status": "Needs review", "claims": 0,
+        "completeness": {"payroll change deadline": "missing"},
+        "review_kinds": ["missing_knowledge"],
+        "experts": []
+      }
+    }
+  ]
+}

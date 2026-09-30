@@ -1,0 +1,393 @@
+{
+  "description": "Fictional payroll cutoff dataset for the Knowledge Trust prototype. Every span text must match one line of its source file exactly.",
+  "tags": [
+    "synthetic",
+    "payroll-cutoff"
+  ],
+  "sources": [
+    {
+      "id": "be-cutoff-v3",
+      "file": "be-cutoff-v3.md",
+      "type": "procedure",
+      "topic": "cutoff",
+      "title": "Payroll change cutoff procedure, Belgium (v3)",
+      "status": "approved",
+      "country": "Belgium",
+      "domain": "Pay",
+      "owner": "Lotte Vermeulen",
+      "effective_from": "2025-05-12",
+      "effective_until": null,
+      "family": "be-cutoff",
+      "version": "3.0",
+      "supersedes": "be-cutoff-v1",
+      "spans": [
+        {
+          "text": "For Belgian payrolls, all payroll changes must reach SD Worx at the latest 5 working days before payday.",
+          "component": "payroll change deadline",
+          "claim_value": "5_working_days"
+        },
+        {
+          "text": "Payroll changes received after the cutoff are processed in the next payroll run.",
+          "component": "late changes",
+          "claim_value": "next_run"
+        },
+        {
+          "text": "A correction run can be requested for the current month and is charged separately.",
+          "component": "correction run",
+          "claim_value": "charged"
+        },
+        {
+          "text": "Only urgent terminations with a final pay obligation can be processed after the cutoff, with approval from the team lead.",
+          "component": "exceptions",
+          "claim_value": "urgent_terminations_team_lead"
+        },
+        {
+          "text": "Questions about the Belgian payroll cutoff procedure go to Lotte Vermeulen, Payroll Operations Belgium.",
+          "component": "contact person",
+          "claim_value": "lotte"
+        }
+      ]
+    },
+    {
+      "id": "be-cutoff-v1",
+      "file": "be-cutoff-v1.md",
+      "type": "procedure",
+      "topic": "cutoff",
+      "title": "Payroll change cutoff procedure, Belgium (v1, old)",
+      "status": "superseded",
+      "country": "Belgium",
+      "domain": "Pay",
+      "owner": "Marc Peeters",
+      "effective_from": "2021-02-18",
+      "effective_until": "2025-05-11",
+      "family": "be-cutoff",
+      "version": "1.0",
+      "supersedes": null,
+      "spans": [
+        {
+          "text": "For Belgian payrolls, all payroll changes must reach SD Worx at the latest 3 working days before payday.",
+          "component": "payroll change deadline",
+          "claim_value": "3_working_days"
+        },
+        {
+          "text": "No exceptions are allowed after the payroll cutoff.",
+          "component": "exceptions",
+          "claim_value": "no_exceptions"
+        },
+        {
+          "text": "Questions about the Belgian payroll cutoff procedure go to Marc Peeters.",
+          "component": "contact person",
+          "claim_value": "marc"
+        }
+      ]
+    },
+    {
+      "id": "be-cutoff-quick-guide",
+      "file": "be-cutoff-quick-guide.md",
+      "type": "note",
+      "topic": "cutoff",
+      "title": "Payroll cutoff quick guide (unknown owner)",
+      "status": "unknown",
+      "country": "Belgium",
+      "domain": "Pay",
+      "owner": null,
+      "effective_from": null,
+      "effective_until": null,
+      "family": "be-cutoff-quick-guide",
+      "version": "unknown",
+      "supersedes": null,
+      "spans": [
+        {
+          "text": "Clients must send all payroll changes 4 working days before payday.",
+          "component": "payroll change deadline",
+          "claim_value": "4_working_days"
+        },
+        {
+          "text": "A correction run is possible but costs extra.",
+          "component": "correction run",
+          "claim_value": "charged"
+        }
+      ]
+    },
+    {
+      "id": "nl-cutoff",
+      "file": "nl-cutoff.md",
+      "type": "procedure",
+      "topic": "cutoff",
+      "title": "Payroll change cutoff procedure, Netherlands",
+      "status": "approved",
+      "country": "Netherlands",
+      "domain": "Pay",
+      "owner": "Sanne de Vries",
+      "effective_from": "2025-08-20",
+      "effective_until": null,
+      "family": "nl-cutoff",
+      "version": "2.1",
+      "supersedes": null,
+      "spans": [
+        {
+          "text": "For Dutch payrolls, all payroll changes must reach SD Worx at the latest 7 working days before payday.",
+          "component": "payroll change deadline",
+          "claim_value": "7_working_days"
+        },
+        {
+          "text": "Correction runs are not available for Dutch payrolls.",
+          "component": "correction run",
+          "claim_value": "not_available"
+        },
+        {
+          "text": "No exceptions are allowed after the payroll cutoff for Dutch payrolls.",
+          "component": "exceptions",
+          "claim_value": "no_exceptions"
+        },
+        {
+          "text": "Questions about the Dutch payroll cutoff procedure go to Sanne de Vries, Payroll Operations Netherlands.",
+          "component": "contact person",
+          "claim_value": "sanne"
+        }
+      ]
+    },
+    {
+      "id": "be-client-service-faq",
+      "file": "be-client-service-faq.md",
+      "type": "note",
+      "topic": "cutoff",
+      "title": "Client Service FAQ, Belgium",
+      "status": "approved",
+      "country": "Belgium",
+      "domain": "Pay",
+      "owner": "Client Service Team Belgium",
+      "effective_from": "2025-03-03",
+      "effective_until": null,
+      "family": "be-client-service-faq",
+      "version": "1.4",
+      "supersedes": null,
+      "spans": [
+        {
+          "text": "A: Clients can send payroll changes up to 2 working days before payday.",
+          "component": "payroll change deadline",
+          "claim_value": "2_working_days"
+        },
+        {
+          "text": "A: Clients can always request a correction run for free.",
+          "component": "correction run",
+          "claim_value": "free"
+        }
+      ]
+    },
+    {
+      "id": "be-knowledge-governance",
+      "file": "be-knowledge-governance.md",
+      "type": "policy",
+      "topic": "general",
+      "title": "Knowledge governance policy, Belgium",
+      "status": "approved",
+      "country": "Belgium",
+      "domain": "Pay",
+      "owner": "Eva Claes",
+      "effective_from": "2025-01-15",
+      "effective_until": null,
+      "family": "be-knowledge-governance",
+      "version": "2.0",
+      "supersedes": null,
+      "spans": [
+        {
+          "text": "When an FAQ or guide contradicts an official payroll procedure, the official procedure is leading.",
+          "component": "source_hierarchy",
+          "claim_value": "procedure_leads"
+        },
+        {
+          "text": "Documents without an owner or date are never an official source.",
+          "component": "unofficial_sources",
+          "claim_value": "no_owner_not_official"
+        },
+        {
+          "text": "When two sources conflict, the owner of the official procedure decides which information is correct.",
+          "component": "who_decides",
+          "claim_value": "procedure_owner"
+        },
+        {
+          "text": "The owner of the conflicting document must update it within 10 working days.",
+          "component": "update_deadline",
+          "claim_value": "10_working_days"
+        },
+        {
+          "text": "When a document owner leaves the company, ownership moves to their team lead.",
+          "component": "owner_leaves",
+          "claim_value": "team_lead"
+        },
+        {
+          "text": "Old versions must be archived when a new version is published.",
+          "component": "archiving",
+          "claim_value": "archive_old"
+        },
+        {
+          "text": "If no document exists for a question, employees contact the relevant country expert, who captures the answer in a new document.",
+          "component": "missing_knowledge",
+          "claim_value": "country_expert_captures"
+        }
+      ]
+    },
+    {
+      "id": "teams-be-consultants",
+      "file": "teams-be-payroll-consultants.json",
+      "type": "chat",
+      "topic": "cutoff",
+      "title": "Teams chat, Payroll Consultants Belgium",
+      "status": "unknown",
+      "country": "Belgium",
+      "domain": "Pay",
+      "owner": null,
+      "effective_from": null,
+      "effective_until": null,
+      "observed_at": "2026-09-10",
+      "family": "teams-be-consultants",
+      "version": "1",
+      "supersedes": null,
+      "spans": [
+        {
+          "text": "Pieter: A client told me Client Service said they can send payroll changes 2 days before payday. Is that still correct?",
+          "component": "question",
+          "claim_value": null
+        },
+        {
+          "text": "Lotte: No, that FAQ is wrong. The official Belgian rule is still 5 working days before payday, and correction runs are not free. I will ask Client Service to fix their FAQ.",
+          "component": "payroll change deadline",
+          "claim_value": "5_working_days"
+        }
+      ]
+    },
+    {
+      "id": "teams-fr-consultants",
+      "file": "teams-fr-payroll-consultants.json",
+      "type": "chat",
+      "topic": "cutoff",
+      "title": "Teams chat, Payroll Consultants France",
+      "status": "unknown",
+      "country": "France",
+      "domain": "Pay",
+      "owner": null,
+      "effective_from": null,
+      "effective_until": null,
+      "observed_at": "2026-09-18",
+      "family": "teams-fr-consultants",
+      "version": "1",
+      "supersedes": null,
+      "spans": [
+        {
+          "text": "Nadia: Does anyone know the deadline for payroll changes for our French clients? I can't find a document.",
+          "component": "question",
+          "claim_value": null
+        },
+        {
+          "text": "Julien: For French payrolls, payroll changes must reach us 6 working days before payday. We don't have a written procedure yet, it's on my to do list.",
+          "component": "payroll change deadline",
+          "claim_value": "6_working_days"
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "from": "be-cutoff-v3",
+      "to": "be-cutoff-v1",
+      "kind": "supersedes",
+      "reason": "Version 3 replaced the 2021 procedure on 2025-05-12."
+    },
+    {
+      "from": "be-cutoff-quick-guide",
+      "to": "be-cutoff-v3",
+      "kind": "near_duplicate",
+      "reason": "Unofficial copy of the cutoff procedure with a different number (4 days instead of 5) and no owner or date."
+    },
+    {
+      "from": "be-client-service-faq",
+      "to": "be-cutoff-v3",
+      "kind": "conflicts",
+      "reason": "Client Service FAQ says 2 working days and free correction runs; the approved procedure says 5 working days and charged correction runs."
+    },
+    {
+      "from": "teams-be-consultants",
+      "to": "be-client-service-faq",
+      "kind": "conflicts",
+      "reason": "The procedure owner states in Teams that the Client Service FAQ is wrong and must be fixed."
+    }
+  ],
+  "people": [
+    {
+      "id": "lotte",
+      "name": "Lotte Vermeulen",
+      "role": "Payroll procedure owner",
+      "team": "Pay",
+      "country": "Belgium"
+    },
+    {
+      "id": "eva",
+      "name": "Eva Claes",
+      "role": "Knowledge governance owner",
+      "team": "Knowledge Management",
+      "country": "Belgium"
+    },
+    {
+      "id": "sanne",
+      "name": "Sanne de Vries",
+      "role": "Payroll procedure owner",
+      "team": "Pay",
+      "country": "Netherlands"
+    },
+    {
+      "id": "julien",
+      "name": "Julien Moreau",
+      "role": "Payroll country expert",
+      "team": "Pay",
+      "country": "France"
+    }
+  ],
+  "expert_activity": [
+    {
+      "id": "cut-a1",
+      "person": "lotte",
+      "kind": "owned",
+      "source": "be-cutoff-v3",
+      "span": 1,
+      "happened_at": "2025-05-12",
+      "explanation": "owns the approved Belgian payroll cutoff procedure"
+    },
+    {
+      "id": "cut-a2",
+      "person": "lotte",
+      "kind": "answered",
+      "source": "teams-be-consultants",
+      "span": 2,
+      "happened_at": "2026-09-10",
+      "explanation": "corrected the Client Service FAQ deadline in Teams"
+    },
+    {
+      "id": "cut-a3",
+      "person": "eva",
+      "kind": "owned",
+      "source": "be-knowledge-governance",
+      "span": 3,
+      "happened_at": "2025-01-15",
+      "explanation": "owns the rules for resolving conflicting sources"
+    },
+    {
+      "id": "cut-a4",
+      "person": "sanne",
+      "kind": "owned",
+      "source": "nl-cutoff",
+      "span": 1,
+      "happened_at": "2025-08-20",
+      "explanation": "owns the approved Dutch payroll cutoff procedure"
+    },
+    {
+      "id": "cut-a5",
+      "person": "julien",
+      "kind": "answered",
+      "source": "teams-fr-consultants",
+      "span": 2,
+      "happened_at": "2026-09-18",
+      "explanation": "answered the French payroll deadline question in Teams; no written procedure exists yet"
+    }
+  ]
+}

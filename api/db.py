@@ -206,11 +206,58 @@ def rebuild_index(db: sqlite3.Connection) -> int:
     return len(rows)
 
 
+DATASETS = Path(__file__).resolve().parent / "datasets"
+
+
 def init_db() -> None:
     with connect() as db:
         db.executescript(SCHEMA)
         if not db.execute("SELECT 1 FROM sources LIMIT 1").fetchone():
             seed(db)
+        # Added separately so databases created before this dataset also receive it.
+        if not db.execute("SELECT 1 FROM sources WHERE id='be-cutoff-v3'").fetchone():
+            seed_manifest(db, DATASETS / "payroll_cutoff")
+
+
+def seed_manifest(db: sqlite3.Connection, folder: Path) -> None:
+    """Load a synthetic dataset described by folder/manifest.json (sources, spans, relations, experts)."""
+    manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
+    span_ids: dict[tuple[str, int], str] = {}
+    for src in manifest["sources"]:
+        path = folder / "sources" / src["file"]
+        raw = path.read_bytes()
+        mime = "application/json" if path.suffix == ".json" else "text/markdown"
+        parsed = extract_spans(raw, mime, path.name)
+        spans = []
+        for i, span in enumerate(src["spans"], 1):
+            match = next((p for p in parsed if p["text"] == span["text"]), None)
+            if not match:
+                raise ValueError(f"Span {i} of {src['id']} does not match a line in {path.name}")
+            spans.append({"location": match["location"], "text": span["text"], "topic": src.get("topic", "general"),
+                          "component": span.get("component"), "claim_value": span.get("claim_value")})
+            span_ids[(src["id"], i)] = f"{src['id']}:s{i}"
+        meta = {k: src.get(k) for k in ("id", "type", "title", "status", "country", "domain", "owner", "client",
+                                        "project", "effective_from", "effective_until", "family", "version",
+                                        "supersedes", "observed_at")}
+        meta.update({"mime": mime, "original_name": path.name, "creator": src.get("owner"),
+                     "published_at": src.get("effective_from"), "modified_at": src.get("effective_from"),
+                     "acl": src.get("acl", "employee"), "seed": True, "tags": manifest.get("tags", ["synthetic"])})
+        import_source(db, meta, raw, spans)
+    for rel in manifest.get("relations", []):
+        db.execute("INSERT INTO relations (from_source,to_source,kind,reason) VALUES (?,?,?,?)",
+                   (rel["from"], rel["to"], rel["kind"], rel["reason"]))
+    for p in manifest.get("people", []):
+        db.execute("INSERT OR IGNORE INTO people VALUES (?,?,?,?,?)", (p["id"], p["name"], p["role"], p["team"], p["country"]))
+        db.execute("INSERT OR IGNORE INTO knowledge_entities VALUES (?,?,?)", (f"person:{p['id']}", "person", p["name"]))
+    for a in manifest.get("expert_activity", []):
+        topic = next((s.get("topic", "general") for s in manifest["sources"] if s["id"] == a["source"]), "general")
+        db.execute("INSERT INTO expert_activity VALUES (?,?,?,?,?,?,?,?)",
+                   (a["id"], a["person"], topic, a["kind"], a["source"], span_ids[(a["source"], a["span"])],
+                    a["happened_at"], a["explanation"]))
+        db.execute("INSERT INTO knowledge_edges (from_node,relation,to_node,source_id,happened_at) VALUES (?,?,?,?,?)",
+                   (f"person:{a['person']}", a["kind"], f"source:{a['source']}", a["source"], a["happened_at"]))
+    for src in manifest["sources"]:
+        db.execute("INSERT OR IGNORE INTO knowledge_entities VALUES (?,?,?)", (f"source:{src['id']}", "document", src["title"]))
 
 
 def seed(db: sqlite3.Connection) -> None:

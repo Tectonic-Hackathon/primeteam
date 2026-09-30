@@ -29,7 +29,7 @@ cd web
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/**. The API seeds 14 synthetic sources automatically into `data/knowledge-trust.sqlite3` on first launch. No demo credentials are needed. The sidebar's **Viewing as** control switches between simulated Employee and Knowledge steward roles. The steward can import files through the Source library. These are demonstration roles, not authentication.
+Open **http://127.0.0.1:5173/**. The API seeds 14 synthetic Atlas sources plus the 8 source payroll cutoff dataset automatically into `data/knowledge-trust.sqlite3` on first launch. An existing database from before the dataset receives the payroll cutoff sources on the next start. No demo credentials are needed. The sidebar's **Viewing as** control switches between simulated Employee and Knowledge steward roles. The steward can import files through the Source library. These are demonstration roles, not authentication.
 
 Optional environment variables are listed in [`.env.example`](.env.example). `DATABASE_PATH` changes the SQLite file path. `VITE_API_URL` changes the UI's API base URL. The default ports are 8000 and 5173. A `.env` file is not required; export variables in your shell if you override them.
 
@@ -43,6 +43,27 @@ Optional environment variables are listed in [`.env.example`](.env.example). `DA
 6. Open **Retrieval details and exclusions**. Show why the France-only procedure and expired Belgium version were excluded.
 7. Click **France handover**, then **Find trusted answer**. Only the France transfer register evidence appears as an answer. Belgium-only records do not become applicable.
 8. Optionally switch to **Knowledge steward**, open **Source library**, and import a small `.md`, `.txt`, `.json`, `.eml`, or `.pdf` file. It remains a draft. Refresh the page to see it persists.
+
+## Payroll cutoff demo dataset
+
+A second synthetic topic lives in [`api/datasets/payroll_cutoff/`](api/datasets/payroll_cutoff/): when must payroll changes reach SD Worx before payday?
+
+| Source | Status | Role in the demo |
+|---|---|---|
+| `be-cutoff-v3` | approved | Correct Belgian procedure: 5 working days, owner Lotte Vermeulen |
+| `be-cutoff-v1` | superseded | Old version: 3 days, owner has left |
+| `be-cutoff-quick-guide` | unknown | Near duplicate without owner or date: 4 days |
+| `be-client-service-faq` | approved by another team | Conflict: 2 days and free correction runs |
+| `nl-cutoff` | approved | Other country: 7 days |
+| `be-knowledge-governance` | approved | Which source leads and who decides |
+| `teams-be-consultants` | chat | The owner says the FAQ is wrong |
+| `teams-fr-consultants` | chat | The only place the French deadline (6 days) exists |
+
+`manifest.json` holds the metadata, the cited spans, relations, people and expert activity; `sources/` holds the stored originals. `demo_questions.json` has 9 questions (two per inspiration area: Trust, Detect, Connect, Capture, plus a scope check and a no answer case). They appear in the UI as **Payroll cutoff demo** buttons with a talking point, and `api/tests/test_payroll_cutoff.py` checks each expected result.
+
+Cutoff questions get their own topic in the planner. Each part of the question (deadline, correction run, exceptions, contact person) is checked separately and marked **conflicted** when another applicable source states a different value. A country without an approved source gets a **Missing knowledge** item and the expert who answered in chat. Review items and general question experts are limited to sources retrieved for the question, so the Atlas and payroll demos do not mix.
+
+Suggested 3 minute path: **Belgian deadline** → **Who decides?** → **French deadline** → **German deadline**.
 
 ## Architecture
 
