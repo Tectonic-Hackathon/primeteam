@@ -1,6 +1,8 @@
 > Team working doc: https://docs.google.com/document/d/1Sd3y1srWgh8ZwH282dtvsXq3oxlC1VOh6FKil8sWyVY/edit?usp=sharing
 
-# Grounded · SD Worx knowledge assistant (first iteration)
+# Grounded · SD Worx knowledge assistant
+
+**Hackathon submission write-up: [SUBMISSION.md](SUBMISSION.md)**
 
 One question in, one grounded answer out: every sentence cites a passage (document → section → line),
 every passage carries six trust signals, and everything that conflicts, duplicates, is outdated or
