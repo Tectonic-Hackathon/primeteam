@@ -1,0 +1,11 @@
+MICROSOFT TEAMS — #northstar-payroll
+Fictional test data for the Tectonic Hackathon.
+
+24/09/2026 10:08 — Sophie Lambert, Payroll Operations
+For Northstar Belgium, please use the current BE-PL-001 v3 guidance. The payroll basis is 80% during approved 1/5 parental leave.
+
+24/09/2026 10:10 — Lina Jacobs, Client Service
+The old file and Thomas's email say 100%.
+
+24/09/2026 10:12 — Sophie Lambert
+Those are based on the previous process. The old document should have been archived.
