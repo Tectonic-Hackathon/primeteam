@@ -1,0 +1,26 @@
+[
+  {
+    "id": "01SPNLTRANS001",
+    "name": "Netherlands – Transition Payment Policy.md",
+    "webUrl": "https://sdworx.sharepoint.com/hr-nl/policies/transition-payment.md",
+    "createdDateTime": "2025-02-03T09:00:00Z",
+    "lastModifiedDateTime": "2026-01-15T10:30:00Z",
+    "createdBy": {"user": {"email": "sofie.janssens@sdworx.com", "displayName": "Sofie Janssens"}},
+    "lastModifiedBy": {"user": {"email": "sofie.janssens@sdworx.com", "displayName": "Sofie Janssens"}},
+    "parentReference": {"path": "/drive/root:/HR/NL/Policies"},
+    "file": {"mimeType": "text/markdown"},
+    "content": "## Entitlement\nAn employee in the Netherlands whose contract is ended by the employer is entitled to a transition payment (transitievergoeding) from the first day of employment.\nThe payment is one third of the monthly salary per full year of service, calculated pro rata for partial years.\n## Cap\nThe transition payment is capped at €98,000 in 2026 or one annual salary if that is higher.\n## Processing\nRegister the termination in the payroll engine with reason code TV and the engine calculates the amount from the salary history."
+  },
+  {
+    "id": "01SPDEMINW002",
+    "name": "Germany – Minimum Wage 2026 Checklist.md",
+    "webUrl": "https://sdworx.sharepoint.com/pay-de/checklists/minimum-wage-2026.md",
+    "createdDateTime": "2025-12-01T08:00:00Z",
+    "lastModifiedDateTime": "2026-01-02T08:00:00Z",
+    "createdBy": {"user": {"email": "lena.mueller@sdworx.com", "displayName": "Lena Müller"}},
+    "lastModifiedBy": {"user": {"email": "lena.mueller@sdworx.com", "displayName": "Lena Müller"}},
+    "parentReference": {"path": "/drive/root:/Payroll/DE/Checklists"},
+    "file": {"mimeType": "text/markdown"},
+    "content": "## January run\nThe statutory minimum wage in Germany is €13.90 per hour from 1 January 2026.\nCheck every hourly wage type below €13.90 in SAP Payroll before the January run and raise it to the minimum.\nMini-job earnings threshold moves to €603 per month accordingly; verify the Minijob flag for affected employees."
+  }
+]

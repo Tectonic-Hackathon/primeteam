@@ -1,0 +1,29 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: grounded-db
+    environment:
+      POSTGRES_USER: grounded
+      POSTGRES_PASSWORD: grounded
+      POSTGRES_DB: grounded
+    ports:
+      - "5433:5432"
+    volumes:
+      - grounded-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grounded"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: grounded-ollama
+    ports:
+      - "11435:11434"
+    volumes:
+      - grounded-ollama:/root/.ollama
+
+volumes:
+  grounded-pg:
+  grounded-ollama:

@@ -1,0 +1,30 @@
+[
+  {
+    "key": "INT-778",
+    "fields": {
+      "summary": "SAP SuccessFactors replication drops cost centre for rehires",
+      "description": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Employees rehired within 12 months replicate from SuccessFactors to eBlox without a cost centre, so their salary posts to the default centre. Workaround: re-run the mapping job INT-MAP-07 after the nightly replication. Fix scheduled for the October integration release."}]}]},
+      "status": {"name": "In Progress"},
+      "assignee": {"emailAddress": "tom.verhoeven@sdworx.com", "displayName": "Tom Verhoeven"},
+      "reporter": {"emailAddress": "els.vandamme@sdworx.com", "displayName": "Els Van Damme"},
+      "created": "2026-09-05T08:12:00.000+0200",
+      "updated": "2026-09-25T16:40:00.000+0200",
+      "labels": ["BE", "client-Proximus"],
+      "project": {"key": "INT"}
+    }
+  },
+  {
+    "key": "PAY-2231",
+    "fields": {
+      "summary": "eBlox meal voucher validation rejects €8.00 face value",
+      "description": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Setting the meal voucher face value to exactly €8.00 fails validation in eBlox 2026.09 although €8 is the legal maximum. Workaround: enter 7.99 until the hotfix. Hotfix planned for eBlox 2026.09.2."}]}]},
+      "status": {"name": "Open"},
+      "assignee": {"emailAddress": "amira.haddad@sdworx.com", "displayName": "Amira Haddad"},
+      "reporter": {"emailAddress": "nadia.elamrani@sdworx.com", "displayName": "Nadia El Amrani"},
+      "created": "2026-09-26T10:00:00.000+0200",
+      "updated": "2026-09-29T09:15:00.000+0200",
+      "labels": ["BE"],
+      "project": {"key": "PAY"}
+    }
+  }
+]

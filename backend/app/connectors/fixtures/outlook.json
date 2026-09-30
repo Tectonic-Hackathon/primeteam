@@ -1,0 +1,22 @@
+[
+  {
+    "id": "AAMkAGVm-tom-20260912",
+    "mailbox": "integrations@sdworx.com",
+    "subject": "SAP SuccessFactors replication window change from October",
+    "receivedDateTime": "2026-09-12T16:02:00Z",
+    "from": {"emailAddress": {"address": "tom.verhoeven@sdworx.com", "name": "Tom Verhoeven"}},
+    "toRecipients": [{"emailAddress": {"address": "integrations@sdworx.com"}}],
+    "body": {"contentType": "html", "content": "<p>From 1 October 2026 the nightly SuccessFactors to eBlox replication moves from 02:00 to 04:00 CET to avoid the SAP backup window.</p><p>Absence write-back stays every 4 hours. Clients with early payroll runs should check that their run is scheduled after 05:00.</p>"},
+    "webLink": "https://outlook.office.com/mail/id/AAMkAGVm-tom-20260912"
+  },
+  {
+    "id": "AAMkAGVm-nadia-20260924",
+    "mailbox": "payroll-be@sdworx.com",
+    "subject": "Colruyt: confirmation of meal voucher face value from January 2027",
+    "receivedDateTime": "2026-09-24T09:30:00Z",
+    "from": {"emailAddress": {"address": "nadia.elamrani@sdworx.com", "name": "Nadia El Amrani"}},
+    "toRecipients": [{"emailAddress": {"address": "payroll-be@sdworx.com"}}],
+    "body": {"contentType": "html", "content": "<p>Colruyt HR confirmed in writing that the meal voucher face value moves from €7 to €8 from 1 January 2027, employer part €6.91 and employee part €1.09.</p><p>Please prepare the eBlox change with effective date 2027-01-01 and run a simulation in December.</p>"},
+    "webLink": "https://outlook.office.com/mail/id/AAMkAGVm-nadia-20260924"
+  }
+]

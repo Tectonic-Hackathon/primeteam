@@ -1,0 +1,28 @@
+[
+  {
+    "id": "1758880000001",
+    "channelName": "hr-be",
+    "createdDateTime": "2026-09-03T09:41:00Z",
+    "lastModifiedDateTime": "2026-09-03T09:41:00Z",
+    "from": {"user": {"email": "els.vandamme@sdworx.com", "displayName": "Els Van Damme"}},
+    "body": {"contentType": "html", "content": "<p>Answering the question from this morning: for a white-collar employee with 7 years of service in Belgium the employer notice period is 24 weeks under the unified statute. Source is the notice periods policy v2, section employer notice.</p>"},
+    "webUrl": "https://teams.microsoft.com/l/message/hr-be/1758880000001"
+  },
+  {
+    "id": "1758880000002",
+    "channelName": "payroll-de",
+    "createdDateTime": "2026-09-18T13:05:00Z",
+    "lastModifiedDateTime": "2026-09-18T13:05:00Z",
+    "from": {"user": {"email": "lena.mueller@sdworx.com", "displayName": "Lena Müller"}},
+    "body": {"contentType": "html", "content": "<p>Reminder for the Siemens November run: Weihnachtsgeld is 55% of base salary per the collective agreement, pro-rated for joiners during the year, wage type 2100. Ping me if the pro-rata looks off.</p>"},
+    "webUrl": "https://teams.microsoft.com/l/message/payroll-de/1758880000002"
+  },
+  {
+    "id": "1758880000003",
+    "channelName": "random",
+    "createdDateTime": "2026-09-20T08:00:00Z",
+    "from": {"user": {"email": "jan.peeters@sdworx.com"}},
+    "body": {"contentType": "text", "content": "Coffee machine on floor 3 is fixed."},
+    "webUrl": "https://teams.microsoft.com/l/message/random/1758880000003"
+  }
+]

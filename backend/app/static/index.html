@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grounded · SD Worx knowledge assistant</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="/">
+      <span class="logo">SD<span class="logo-dot">·</span>Worx</span>
+      <span class="divider"></span>
+      <span class="product">Grounded <span class="tag">preview</span></span>
+    </a>
+    <div class="topbar-right">
+      <label class="askas">Ask as
+        <select id="user"></select>
+      </label>
+      <button class="topbtn" id="addbtn" type="button">+ Add knowledge</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero" id="hero">
+    <h1>Ask once. Get the answer, the evidence, and who to trust.</h1>
+    <p class="lede">Every statement is grounded to document → section → line, scored for freshness, ownership and scope, and cross-checked for conflicts, duplicates and gaps.</p>
+    <form id="askform" class="askbox">
+      <input id="q" type="text" autocomplete="off" placeholder="e.g. How many days of guaranteed salary during sick leave in Belgium?">
+      <button type="submit" id="askbtn">Ask</button>
+    </form>
+    <div id="suggestions" class="chips"></div>
+    <button class="morelink" id="morelink" type="button">More examples</button>
+    <div class="features">
+      <span><b>Grounded to the line</b></span><i></i>
+      <span><b>Six trust signals</b></span><i></i>
+      <span><b>Conflicts made visible</b></span><i></i>
+      <span><b>Experts, not seniority</b></span>
+    </div>
+  </section>
+
+  <section id="results" class="results hidden">
+    <div class="main">
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" data-tab="answer">Answer</button>
+          <button class="tab" data-tab="review">Issues <span id="reviewcount" class="count">0</span></button>
+          <button class="tab" data-tab="trace">How it was answered</button>
+          <button class="copybtn" id="copybtn" type="button" title="Copy the answer with its sources">Copy</button>
+        </div>
+        <div id="tab-answer" class="tabpane"></div>
+        <div id="tab-review" class="tabpane hidden"></div>
+        <div id="tab-trace" class="tabpane hidden"></div>
+      </div>
+      <div class="card" id="evidence-card">
+        <button class="card-toggle" id="evtoggle" type="button"><span class="card-title" style="margin:0">Sources <span class="muted" id="evcount"></span></span><span class="chev">▾</span></button>
+        <div id="evidence" class="collapsible"></div>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="card" id="experts-card"></div>
+    </aside>
+  </section>
+</main>
+
+<div id="modal" class="modal hidden"><div class="modal-backdrop"></div><div class="modal-body" id="modal-body"></div></div>
+<div id="drawer" class="drawer hidden"><div class="drawer-body" id="drawer-body"></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+[
+  {
+    "id": "MSO-2026-09-28-NLHR",
+    "subject": "NL HR sync – vacation day expiry",
+    "createdDateTime": "2026-09-28T10:00:00Z",
+    "organizer": "sofie.janssens@sdworx.com",
+    "attendees": ["sofie.janssens@sdworx.com", "jan.peeters@sdworx.com"],
+    "location": "Teams meeting › NL HR sync › 28 Sep 2026 10:00–10:30",
+    "joinWebUrl": "https://teams.microsoft.com/l/meetup-join/nl-hr-sync-2026-09-28",
+    "country": "NL",
+    "transcript": "Sofie Janssens: Quick one on statutory vacation days in the Netherlands. Several Albert Heijn employees lost days on 1 July because nobody reminded them.\nJan Peeters: In Belgium we send a reminder in October, we could reuse that flow.\nSofie Janssens: Decision: from 2027 every Dutch client gets an automatic reminder on 1 April listing statutory days that expire on 1 July.\nSofie Janssens: Action (Jan): configure the reminder template in the absence module by 15 November 2026.\nSofie Janssens: Action (Sofie): inform Albert Heijn HR about the new reminder in the October account review."
+  },
+  {
+    "id": "MSO-2026-09-29-PAYBE",
+    "subject": "Payroll BE weekly",
+    "createdDateTime": "2026-09-29T14:00:00Z",
+    "organizer": "els.vandamme@sdworx.com",
+    "attendees": ["els.vandamme@sdworx.com", "amira.haddad@sdworx.com", "nadia.elamrani@sdworx.com"],
+    "location": "Room Antwerp 3.12 › 29 Sep 2026 14:00–14:30",
+    "joinWebUrl": "https://teams.microsoft.com/l/meetup-join/payroll-be-weekly-2026-09-29",
+    "country": "BE",
+    "client": "Colruyt",
+    "transcript": "Els Van Damme: Two items. First the Colruyt meal voucher change to eight euro from January, Nadia has the written confirmation.\nNadia El Amrani: Yes, sent to the payroll-be mailbox last week.\nAmira Haddad: The eBlox validation bug on the eight euro value is PAY-2231, hotfix in 2026.09.2, so the change can only be entered after the hotfix.\nEls Van Damme: Decision: enter the Colruyt face value change only after eBlox 2026.09.2 is deployed, target the first week of December.\nEls Van Damme: Action (Amira): confirm the hotfix deployment date to Nadia by 20 October 2026.\nEls Van Damme: Second item, the provider switch. Still no signed contract, so nothing changes in the export for now."
+  }
+]

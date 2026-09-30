@@ -1,0 +1,24 @@
+[
+  {
+    "id": "884411",
+    "title": "Belgium – Eco Vouchers Procedure",
+    "space": {"name": "Payroll BE"},
+    "ancestors": [{"title": "Procedures"}],
+    "version": {"number": 4, "when": "2026-03-10T14:20:00.000Z", "by": {"email": "els.vandamme@sdworx.com", "displayName": "Els Van Damme"}},
+    "history": {"createdDate": "2024-05-06T09:00:00.000Z", "createdBy": {"email": "els.vandamme@sdworx.com"}},
+    "metadata": {"labels": {"results": [{"name": "procedure"}, {"name": "BE"}]}},
+    "body": {"storage": {"value": "<h2>Rule</h2><p>Eco vouchers in Belgium are capped at €250 per full-time employee per year and are exempt from social security and tax when granted under a sector or company agreement.</p><p>They are valid for 24 months and can only be spent on ecological products and services.</p><h2>Steps in eBlox</h2><p>Open the client, go to Benefits &gt; Eco vouchers, set the annual amount and the reference period.</p><p>Run the annual order in June and send the order file to the voucher provider before the 15th.</p>"}},
+    "_links": {"base": "https://sdworx.atlassian.net/wiki", "webui": "/spaces/PAYBE/pages/884411"}
+  },
+  {
+    "id": "884420",
+    "title": "SAP HCM time file – Colruyt import specification",
+    "space": {"name": "Integrations"},
+    "ancestors": [{"title": "Client specifications"}],
+    "version": {"number": 2, "when": "2026-08-21T11:00:00.000Z", "by": {"email": "tom.verhoeven@sdworx.com"}},
+    "history": {"createdDate": "2026-02-12T09:00:00.000Z", "createdBy": {"email": "tom.verhoeven@sdworx.com"}},
+    "metadata": {"labels": {"results": [{"name": "manual"}, {"name": "BE"}]}},
+    "body": {"storage": {"value": "<h2>File</h2><p>Colruyt delivers worked days and absences from SAP HCM as a pipe-separated file COL_TIME_YYYYMM.txt on the SFTP drop before the 20th of each month.</p><p>Each line holds employee number, date, hours worked, absence code and cost centre.</p><h2>Mapping</h2><p>Absence codes map to eBlox through table INT-MAP-12; unknown codes are rejected and listed in the import report.</p>"}},
+    "_links": {"base": "https://sdworx.atlassian.net/wiki", "webui": "/spaces/INT/pages/884420"}
+  }
+]
